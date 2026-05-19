@@ -601,9 +601,10 @@ function render(){
     const ret1yCell=e.ret1y===null
       ?'<span class="na">—</span>'
       :'<span class="'+cc(e.ret1y)+'" style="font-weight:600">'+fmt(e.ret1y)+'</span>';
-    return '<tr class="'+(trap?'is-trap':'\"')+'\">'
+    return '<tr class="'+(trap?'is-trap':'')+'">'
+      +'<td style="padding:7px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
-      +'<button class="sym-btn" onclick="openModal(D.find(x=>x.symbol===\''+e.symbol.replace(/'/g,"\\'")+'\'&&x.name===\''+e.name.replace(/['"\\]/g,'').slice(0,20)+'\'))">'+e.symbol+'</button>'
+      +'<button class="sym-btn" data-sym="'+e.symbol+'">'+e.symbol+'</button>'
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
