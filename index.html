@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>High-Yield, Best Total Return ETF's</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1b2e5b;--navy-dark:#111e3d;--navy-deep:#0b1428;--navy-light:#243d7a;--navy-mid:#1e3468;
+    --lime:#d3e050;--lime-dim:rgba(211,224,80,0.12);--lime-glow:rgba(211,224,80,0.25);
+    --txt:#e8edf8;--txt2:#8fafd4;--txt3:#8fafd4;
+    --pos:#4ade80;--neg:#f87171;--pos-bg:rgba(74,222,128,0.10);--neg-bg:rgba(248,113,113,0.10);
+    --trap-bg:rgba(248,113,113,0.12);--trap-txt:#f87171;
+    --border:rgba(139,155,192,0.15);--border2:rgba(139,155,192,0.25);
+    --surface:#1b2e5b;--surface2:#162549;--surface3:#111e3d;
+    --r:6px;--rl:10px;
+    --font:'Inter',-apple-system,sans-serif;--mono:'JetBrains Mono','Courier New',monospace;
+  }
+  body{font-family:var(--font);background:var(--navy-deep);color:var(--txt);min-height:100vh;font-size:14px}
+  .ticker-wrap{background:var(--navy-dark);border-bottom:1px solid var(--border);overflow:hidden;height:32px;display:flex;align-items:center}
+  .ticker-track{display:flex;animation:ticker 80s linear infinite;white-space:nowrap}
+  .ticker-track:hover{animation-play-state:paused}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .tick{font-family:var(--mono);font-size:12px;padding:0 20px;display:flex;align-items:center;gap:6px;border-right:1px solid var(--border)}
+  .tick-sym{color:var(--lime);font-weight:500}
+  nav{background:var(--navy-dark);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:52px}
+  .nav-brand{display:flex;align-items:center;gap:10px;padding:4px 0}
+  .brand-icon{width:28px;height:28px;background:var(--lime);border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy-deep);font-family:var(--mono)}
+  .brand-name{font-size:14px;font-weight:600;color:var(--txt);letter-spacing:-0.02em}
+  .brand-slogan{font-size:12px;font-style:italic;color:#b8cfe8;margin-top:2px}
+  .nav-tabs{display:flex;height:100%}
+  .ntab{font-family:var(--font);font-size:12px;padding:0 16px;border:none;background:transparent;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;height:100%;display:flex;align-items:center}
+  .ntab:hover{color:var(--txt)}
+  .ntab.active{color:var(--lime);border-bottom:2px solid var(--lime);font-weight:500}
+  .nav-meta{font-size:12px;color:var(--txt2);font-family:var(--mono)}
+  .wrap{max-width:1280px;margin:0 auto;padding:1.25rem 1.25rem 3rem}
+  .tab-panel{display:none}.tab-panel.active{display:block}
+  .heroes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
+  @media(max-width:640px){.heroes{grid-template-columns:1fr}}
+  .hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1rem 1.25rem;position:relative;overflow:hidden}
+  .hero-top{border-top:2px solid var(--lime)}
+  .hero-worst{border-top:2px solid var(--neg)}
+  .hero-worst-pos{border-top:2px solid var(--neg)}
+  .hbadge{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+  .hbadge-top{color:var(--lime)}.hbadge-worst{color:var(--neg)}.hbadge-mid{color:var(--neg)}
+  .hero-sym{font-size:28px;font-weight:600;color:var(--txt);font-family:var(--mono);letter-spacing:-0.02em}
+  .hero-nm{font-size:12px;color:var(--txt2);margin-top:2px;margin-bottom:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hero-stats{display:flex;gap:1.25rem;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:10px}
+  .si{display:flex;flex-direction:column;gap:3px}
+  .sl{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3)}
+  .sv{font-size:15px;font-weight:600;font-family:var(--mono)}
+  .yp{font-size:10px;background:var(--trap-bg);color:var(--trap-txt);border-radius:4px;padding:1px 5px;font-weight:600;margin-left:4px;white-space:nowrap;flex-shrink:0}
+  .pos{color:var(--pos)}.neg{color:var(--neg)}.nt{color:var(--txt2)}
+  .filters{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:.875rem 1.25rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:10px}
+  .filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .flabel{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);min-width:72px}
+  input[type=search]{font-family:var(--font);font-size:13px;padding:6px 11px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);width:220px;outline:none}
+  input[type=search]:focus{border-color:var(--lime);box-shadow:0 0 0 2px var(--lime-glow)}
+  input[type=range]{flex:1;max-width:160px;accent-color:var(--lime)}
+  .pill{font-size:12px;font-family:var(--font);padding:4px 11px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--txt2);cursor:pointer;white-space:nowrap}
+  .pill:hover{border-color:var(--txt2);color:var(--txt)}
+  .pill.on{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:500}
+  .pill.trap-on{background:var(--trap-bg);border-color:var(--trap-txt);color:var(--trap-txt)}
+  .sval{font-size:11px;color:var(--lime);font-family:var(--mono);font-weight:500;min-width:52px}
+  .sdivider{width:1px;background:var(--border2);align-self:stretch;margin:0 4px}
+  .rcount{font-size:11px;color:var(--txt3);font-family:var(--mono);margin-left:auto}
+  .top-row{display:flex;gap:6px;align-items:center;margin-bottom:.875rem;flex-wrap:wrap}
+  .fb{font-size:12px;font-family:var(--font);padding:5px 14px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--txt2);cursor:pointer}
+  .fb:hover{border-color:var(--txt2);color:var(--txt)}
+  .fb.active{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:500}
+  .trap-pill{font-size:12px;font-family:var(--mono);display:flex;align-items:center;gap:5px;margin-left:auto;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r)}
+  .tw{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
+  thead th{background:var(--surface3);font-size:10px;font-weight:600;color:var(--txt3);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;user-select:none}
+  thead th.r{text-align:right}
+  thead th:hover{color:var(--txt)}
+  thead th.sort-asc::after{content:" ↑";color:var(--lime)}
+  thead th.sort-desc::after{content:" ↓";color:var(--lime)}
+  tbody tr{border-bottom:1px solid var(--border)}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--surface2)}
+  tbody tr.is-trap{background:rgba(248,113,113,0.04)}
+  td{padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono)}
+  td.name-cell{font-family:var(--font)}
+  td.r{text-align:right}
+  .sc{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden;min-width:0}
+  .rk{font-size:10px;color:var(--txt3);min-width:22px;flex-shrink:0}
+  .sym-btn{font-weight:600;font-size:13px;color:var(--lime);background:none;border:none;cursor:pointer;font-family:var(--mono);padding:0;white-space:nowrap;flex-shrink:0;text-decoration:none}
+  .sym-btn:hover{text-decoration:underline;text-underline-offset:3px}
+  .name-tip{position:relative;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:var(--txt2)}
+  .name-tip:hover::after{content:attr(data-tip);position:fixed;background:var(--surface3);color:var(--txt);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;font-size:12px;white-space:nowrap;z-index:1000;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.5);transform:translateY(-120%);max-width:340px;word-break:break-word;white-space:normal}
+  .fp{font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--border);color:var(--txt3);background:var(--surface3);font-family:var(--font);font-weight:500}
+  .star-btn{background:none;border:none;cursor:pointer;font-size:15px;color:var(--txt3);padding:0 4px;line-height:1;transition:color .15s,transform .15s;flex-shrink:0}
+  .star-btn:hover{color:var(--lime);transform:scale(1.2)}
+  .star-btn.starred{color:var(--lime)}
+  .na{color:var(--txt3);font-size:12px}
+  .empty{padding:2.5rem;text-align:center;color:var(--txt3);font-size:13px}
+  .col-r{width:11%}.col-n{width:17%}.col-p{width:6%}.col-c{width:6%}.col-1y{width:9%}.col-ytd{width:6%}.col-1m{width:6%}.col-6m{width:6%}.col-yt{width:8%}.col-yf{width:8%}.col-fr{width:8%}
+
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--navy-dark);border:1px solid var(--border2);border-radius:var(--rl);width:100%;max-width:680px;max-height:90vh;overflow-y:auto;position:relative}
+  .modal-header{padding:1.25rem 1.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;position:sticky;top:0;background:var(--navy-dark);z-index:10}
+  .modal-sym{font-size:30px;font-weight:700;font-family:var(--mono);color:var(--lime);letter-spacing:-0.02em}
+  .modal-name{font-size:13px;color:var(--txt2);margin-top:3px}
+  .modal-price-block{text-align:right}
+  .modal-price{font-size:22px;font-weight:600;font-family:var(--mono)}
+  .modal-chg{font-size:13px;font-family:var(--mono);margin-top:2px}
+  .modal-close{background:none;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt2);cursor:pointer;font-size:18px;padding:2px 8px;line-height:1;flex-shrink:0}
+  .modal-close:hover{color:var(--txt);border-color:var(--txt2)}
+  .modal-body{padding:1.25rem 1.5rem}
+  .modal-section{margin-bottom:1.5rem}
+  .modal-section:last-child{margin-bottom:0}
+  .modal-section-title{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);margin-bottom:.875rem;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+  @media(max-width:500px){.modal-grid{grid-template-columns:repeat(2,1fr)}}
+  .modal-stat{display:flex;flex-direction:column;gap:3px}
+  .modal-stat-label{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3)}
+  .modal-stat-value{font-size:14px;font-weight:500;font-family:var(--mono);color:var(--txt)}
+  .modal-trap-badge{display:inline-flex;align-items:center;gap:6px;background:var(--trap-bg);color:var(--trap-txt);border:1px solid rgba(248,113,113,0.3);border-radius:var(--r);padding:5px 10px;font-size:12px;font-weight:600;font-family:var(--mono);margin-bottom:.875rem}
+
+  /* About tab */
+  .about{display:flex;flex-direction:column;gap:1.25rem}
+  .about-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem}
+  .about-card h2{font-size:13px;font-weight:600;color:var(--lime);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.875rem}
+  .about-card p{font-size:14px;color:var(--txt2);line-height:1.8;margin-bottom:.75rem}
+  .about-card p:last-child{margin-bottom:0}
+  .about-card ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .about-card ul li{font-size:14px;color:var(--txt2);line-height:1.6;display:flex;gap:10px}
+  .about-card ul li::before{content:"—";color:var(--txt3);flex-shrink:0}
+  .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  @media(max-width:600px){.feature-grid{grid-template-columns:1fr}}
+  .trap-rule{display:inline-flex;align-items:center;gap:8px;background:var(--trap-bg);color:var(--trap-txt);border:1px solid rgba(248,113,113,0.25);border-radius:var(--r);padding:6px 12px;font-size:12px;font-weight:600;margin-top:6px;font-family:var(--mono)}
+  footer{margin-top:1.5rem;padding:.875rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);font-size:13px;color:#b8cfe8;line-height:1.9}
+  footer strong{color:var(--txt2)}
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
+  .footer-credit{font-size:12px;color:var(--lime);font-weight:500}
+  .footer-date{font-size:12px;color:var(--txt2);font-family:var(--mono)}
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<nav>
+  <div class="nav-brand">
+    <img src="logo.png" alt="High-Yield, Best Total Return ETF's" style="height:52px;width:auto;display:block;">
+    <div class="brand-slogan" style="font-size:12px;font-style:italic;color:#b8cfe8;margin-left:10px;white-space:nowrap">Total return is what really matters.</div>
+  </div>
+  <div class="nav-tabs">
+    <button class="ntab active" data-tab="dashboard">Dashboard</button>
+    <button class="ntab" data-tab="watchlist">&#9733; Watchlist <span id="watchCount" style="font-size:10px;background:var(--lime-dim);color:var(--lime);border-radius:10px;padding:1px 6px;margin-left:4px"></span></button>
+    <button class="ntab" data-tab="about">Strategy &amp; Features</button>
+  </div>
+  <div class="nav-meta" id="navMeta">Data: May 19, 2026</div>
+</nav>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-sym" id="mSym"></div>
+        <div class="modal-name" id="mName"></div>
+      </div>
+      <div class="modal-price-block">
+        <div class="modal-price" id="mPrice"></div>
+        <div class="modal-chg" id="mChg"></div>
+      </div>
+      <button class="modal-close" id="modalClose">&#10005;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="tab-panel active" id="tab-dashboard">
+    <div class="heroes">
+      <div class="hero hero-top" id="heroTop"></div>
+      <div class="hero" id="heroWorst"></div>
+    </div>
+    <div class="filters">
+      <div class="filter-row">
+        <span class="flabel">Search</span>
+        <input type="search" id="searchBox" placeholder="Symbol or fund name&hellip;">
+      </div>
+      <div class="filter-row">
+        <span class="flabel">Frequency</span>
+        <button class="pill on" data-freq="All">All</button>
+        <button class="pill" data-freq="Weekly">Weekly</button>
+        <button class="pill" data-freq="Monthly">Monthly</button>
+        <button class="pill" data-freq="Quarterly">Quarterly</button>
+        <button class="pill" data-freq="Semiannual">Semiannual</button>
+        <button class="pill" data-freq="Annual">Annual</button>
+      </div>
+      <div class="filter-row">
+        <span class="flabel">1Y Return</span>
+        <button class="pill on" data-ret="all">All</button>
+        <button class="pill" data-ret="pos">Positive only</button>
+        <button class="pill" data-ret="neg">Negative only</button>
+        <button class="pill" id="trapBtn">&#9888; Yield traps only</button>
+      </div>
+      <div class="filter-row">
+        <span class="flabel">1Y Return &#8805;</span>
+        <input type="range" id="returnSlider" min="0" step="1" value="0">
+        <span class="sval" id="returnVal">any</span>
+        <span class="sdivider"></span>
+        <span class="flabel" style="min-width:auto">6M Return &#8805;</span>
+        <input type="range" id="return6mSlider" min="0" step="1" value="0">
+        <span class="sval" id="return6mVal">any</span>
+        <span class="sdivider"></span>
+        <span class="flabel" style="min-width:auto">Yield &#8805;</span>
+        <input type="range" id="yieldSlider" min="0" step="1" value="0">
+        <span class="sval" id="yieldVal">0%</span>
+        <span class="rcount" id="resultCount"></span>
+      </div>
+    </div>
+    <div class="top-row">
+      <span style="font-size:11px;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase">Show</span>
+      <button class="fb" data-n="10">Top 10</button>
+      <button class="fb active" data-n="25">Top 25</button>
+      <button class="fb" data-n="50">Top 50</button>
+      <button class="fb" data-n="999">All</button>
+      <div class="trap-pill" id="trapStatus"></div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th style="width:3%;padding:8px 4px"></th>
+        <th class="col-r" data-col="symbol">#&nbsp; Symbol</th>
+        <th class="col-n name-cell" data-col="name">Fund name</th>
+        <th class="col-p r" data-col="price">Price</th>
+        <th class="col-c r" data-col="chg">Day %</th>
+        <th class="col-1y r sort-desc" data-col="ret1y">1Y Total Return</th>
+        <th class="col-ytd r" data-col="ytd">YTD</th>
+        <th class="col-1m r" data-col="m1">1M</th>
+        <th class="col-6m r" data-col="m6">6M</th>
+        <th class="col-yt r" data-col="yTTM">Yield TTM</th>
+        <th class="col-yf r" data-col="yFWD">Yield FWD</th>
+        <th class="col-fr" data-col="freq">Frequency</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table></div>
+  </div>
+
+  <div class="tab-panel" id="tab-watchlist">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
+      <div>
+        <div style="font-size:16px;font-weight:600;color:var(--txt)">&#9733; My Watchlist</div>
+        <div style="font-size:12px;color:var(--txt2);margin-top:3px">ETFs you have starred. Click any &#9733; in the dashboard to add or remove.</div>
+      </div>
+      <button id="clearWatchlist" style="font-size:12px;font-family:var(--font);padding:5px 12px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--txt2);cursor:pointer">Clear all</button>
+    </div>
+    <div id="watchlistEmpty" style="display:none;padding:3rem;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl)">
+      <div style="font-size:32px;margin-bottom:.75rem">&#9734;</div>
+      <div style="font-size:14px;color:var(--txt2)">No ETFs in your watchlist yet.</div>
+      <div style="font-size:13px;color:var(--txt3);margin-top:6px">Click the &#9733; next to any ticker on the Dashboard to add it here.</div>
+    </div>
+    <div class="tw" id="watchlistTable" style="display:none"><table>
+      <thead><tr>
+        <th style="width:4%"></th>
+        <th class="col-r" data-col="symbol" style="width:11%">#&nbsp; Symbol</th>
+        <th class="col-n name-cell" data-col="name" style="width:17%">Fund name</th>
+        <th class="col-p r" data-col="price" style="width:6%">Price</th>
+        <th class="col-c r" data-col="chg" style="width:6%">Day %</th>
+        <th class="col-1y r" data-col="ret1y" style="width:9%">1Y Total Return</th>
+        <th class="col-ytd r" data-col="ytd" style="width:7%">YTD</th>
+        <th class="col-1m r" data-col="m1" style="width:6%">1M</th>
+        <th class="col-6m r" data-col="m6" style="width:6%">6M</th>
+        <th class="col-yt r" data-col="yTTM" style="width:8%">Yield TTM</th>
+        <th class="col-yf r" data-col="yFWD" style="width:8%">Yield FWD</th>
+        <th class="col-fr" data-col="freq" style="width:8%">Frequency</th>
+      </tr></thead>
+      <tbody id="watchlistBody"></tbody>
+    </table></div>
+  </div>
+
+    <div class="tab-panel" id="tab-about">
+    <div class="about">
+      <div class="about-card">
+        <h2>The Strategy</h2>
+        <p>Most dividend trackers rank by yield alone — the bigger the number, the better the rank. This tracker does the opposite. <strong style="color:var(--txt)">Total return is the primary metric</strong>, because a 60% yield means nothing if the fund loses 50% of its value.</p>
+        <p>The "High-Yield, Best Total Return ETF's" strategy focuses on dividend ETFs that deliver both: genuinely high income <em>and</em> positive capital growth. Funds that sacrifice share price to pay dividends are flagged as yield traps and surfaced as warnings, not recommendations.</p>
+        <p>Every ETF in the leaderboard is sorted descending by 1Y Total Return by default. ETFs with less than 12 months of history show "—" for that column and sort to the bottom, but remain visible because they may already have strong 6M momentum.</p>
+      </div>
+      <div class="about-card">
+        <h2>What Is a Yield Trap?</h2>
+        <p>A yield trap is a fund that looks attractive on paper because of its high distribution yield, but is actively destroying capital. The rule applied here:</p>
+        <div class="trap-rule">&#9888;&nbsp; Yield TTM &gt; 8% AND 1Y Total Return &lt; 0%</div>
+        <p style="margin-top:.875rem">When both conditions are true, the ETF is flagged in the leaderboard and counted in the yield trap indicator. These are funds to avoid, not buy.</p>
+        <p><strong style="color:var(--txt)">Why two different thresholds?</strong> The tracker uses a 6% minimum yield as the eligibility floor — that defines what counts as a genuinely high-yield fund. The yield trap warning is set at a higher 8% threshold because it targets a more specific danger: funds so aggressively distributing income that they are actively destroying their net asset value. A fund yielding 6.5% with a slightly negative total return may simply be going through a rough patch. A fund yielding 60% with a deeply negative return is almost certainly paying out its own capital as income — a classic yield trap. The 8% line is where that pattern becomes a meaningful warning signal.</p>
+      </div>
+      <div class="about-card">
+        <h2>About This Tracker</h2>
+        <ul>
+          <li>Tracking the best high-yield dividend ETFs from the <strong style="color:var(--txt)">United States and Canada</strong>, ranked by 1-year total return</li>
+          <li>Covers US-listed ETFs (NYSE, NASDAQ, CBOE) and Canadian-listed ETFs (TSX) — including popular Canadian high-income funds such as Harvest, CI, and Purpose strategies</li>
+          <li>765 ETFs tracked across all asset classes and dividend frequencies (out of 909 screened)</li>
+          <li>Eligibility: at least 6 months of price history AND Yield TTM of 6% or higher</li>
+          <li>ETFs with less than 12 months of history are included but show "—" for 1Y Total Return</li>
+          <li>Updated daily with fresh market data</li>
+          <li>Designed for income investors in the US and Canada who refuse to sacrifice capital growth for yield</li>
+          <li>Personal research tool — not financial advice</li>
+        </ul>
+      </div>
+      <div class="about-card">
+        <h2>Features</h2>
+        <ul class="feature-grid">
+          <li>Top 1Y performer hero card</li>
+          <li>Worst 1Y performer hero card with yield trap detection</li>
+          <li>Clickable symbols — full ETF detail modal with all available data</li>
+          <li>Fund name tooltip on hover — shows full name</li>
+          <li>Default sort by 1Y Total Return (descending)</li>
+          <li>Sort by any column — ascending or descending</li>
+          <li>Search by ticker symbol or fund name</li>
+          <li>Filter by dividend frequency (Weekly, Monthly, Quarterly, Semiannual, Annual)</li>
+          <li>Filter by 1Y return: all, positive only, or negative only</li>
+          <li>Yield Traps Only toggle — isolates all flagged funds instantly</li>
+          <li>Dynamic 1Y Return slider — minimum threshold filter</li>
+          <li>Dynamic 6M Return slider — minimum 6-month performance filter</li>
+          <li>Dynamic Yield TTM slider — range scales to today's highest yield</li>
+          <li>Live result count showing filtered ETF count vs. total</li>
+          <li>Top 10 / 25 / 50 / All quick view controls</li>
+          <li>Yield trap counter across the full dataset</li>
+          <li>Live scrolling ticker tape — top ETFs by 1Y return</li>
+          <li>Dark mode design — optimized for long sessions</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <strong>Disclaimer:</strong> This tracker is not financial advice. Information provided is for fun, entertainment, and research purposes only. Please consult a licensed financial planner for all your financial planning needs.
+    &nbsp;|&nbsp; <strong>Yield trap:</strong> Yield TTM &gt; 8% AND 1Y Total Return &lt; 0%.
+    &nbsp;|&nbsp; <strong>Eligibility:</strong> ETFs must have at least 6 months of price history and a Yield TTM of 6% or higher.
+    <div class="footer-bottom">
+      <span class="footer-date">Last updated: May 19, 2026</span>
+      <span class="footer-credit">Developed by Axiom Creative Studios</span>
+    </div>
+  </footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ── Sort by 1Y desc, nulls last ── */
+D.sort((a,b)=>{
+  if(a.ret1y===null && b.ret1y===null) return 0;
+  if(a.ret1y===null) return 1;
+  if(b.ret1y===null) return -1;
+  return b.ret1y - a.ret1y;
+});
+
+const isYT=e=>e.yTTM>8&&e.ret1y!==null&&e.ret1y<0;
+const fmt=(v,d=1)=>v===null?'—':(v>=0?'+':'')+v.toFixed(d)+'%';
+const cc=v=>v===null?'na':v>0?'pos':v<0?'neg':'nt';
+const fmtM=v=>v===null?'—':v>=1000?(v/1000).toFixed(1)+'B':v.toFixed(0)+'M';
+const fmtN=v=>v===null?'—':v.toFixed(2);
+
+/* ── Ticker ── */
+const top20=[...D].filter(e=>e.ret1y!==null).slice(0,20);
+const track=document.getElementById('tickerTrack');
+const ti=top20.map(e=>`<span class="tick"><span class="tick-sym">${e.symbol}</span><span class="${cc(e.ret1y)}">${fmt(e.ret1y)}</span></span>`).join('');
+track.innerHTML=ti+ti;
+
+/* ── Sliders ── */
+const maxYield=Math.ceil(Math.max(...D.map(e=>e.yTTM)));
+const validRet=D.filter(e=>e.ret1y!==null);
+const minReturn=Math.floor(Math.min(...validRet.map(e=>e.ret1y)));
+const maxReturn=Math.ceil(Math.max(...validRet.map(e=>e.ret1y)));
+const min6m=Math.floor(Math.min(...D.map(e=>e.m6)));
+const max6m=Math.ceil(Math.max(...D.map(e=>e.m6)));
+const ySlider=document.getElementById('yieldSlider');
+const rSlider=document.getElementById('returnSlider');
+const r6mSlider=document.getElementById('return6mSlider');
+ySlider.max=maxYield;
+rSlider.min=minReturn; rSlider.max=maxReturn; rSlider.value=minReturn;
+r6mSlider.min=min6m; r6mSlider.max=max6m; r6mSlider.value=min6m;
+
+/* ── Tabs ── */
+document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.ntab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+}));
+
+/* ── Hero cards ── */
+function buildCard(el,e,badgeClass,icon,lbl){
+  el.className='hero '+(lbl.includes('Worst')?'hero-worst':'hero-top');
+  el.innerHTML='<div class="hbadge hbadge-'+(lbl.includes('Top')?'top':e.ret1y!==null&&e.ret1y<0?'worst':'mid')+'">'+icon+' '+lbl+'</div>'
+    +'<div style="display:flex;align-items:center">'
+    +'<span class="hero-sym">'+e.symbol+'</span>'+(isYT(e)?'<span class="yp">&#9888; yield trap</span>':'')+'</div>'
+    +'<div class="hero-nm">'+e.name+'</div>'
+    +'<div class="hero-stats">'
+    +'<div class="si"><div class="sl">1Y Total Return</div><div class="sv '+cc(e.ret1y)+'">'+fmt(e.ret1y)+'</div></div>'
+    +'<div class="si"><div class="sl">6M</div><div class="sv '+cc(e.m6)+'">'+fmt(e.m6)+'</div></div>'
+    +'<div class="si"><div class="sl">Yield TTM</div><div class="sv">'+e.yTTM.toFixed(2)+'%</div></div>'
+    +'<div class="si"><div class="sl">Frequency</div><div class="sv" style="font-size:12px">'+e.freq+'</div></div>'
+    +'<div class="si"><div class="sl">Price</div><div class="sv" style="font-size:12px">$'+e.price.toFixed(2)+'</div></div>'
+    +'</div>';
+}
+buildCard(document.getElementById('heroTop'),D[0],'top','▲','Top 1Y Performer');
+buildCard(document.getElementById('heroWorst'),D[D.length-1],'worst','▼','Worst 1Y Performer');
+
+/* ── Modal ── */
+function openModal(e){
+  document.getElementById('mSym').textContent=e.symbol;
+  document.getElementById('mName').textContent=e.name;
+  document.getElementById('mPrice').textContent='$'+e.price.toFixed(2);
+  const chgEl=document.getElementById('mChg');
+  chgEl.textContent=(e.chg>=0?'+':'')+e.chg.toFixed(2)+'% today';
+  chgEl.className='modal-chg '+cc(e.chg);
+
+  let html='';
+  if(isYT(e)) html+='<div class="modal-trap-badge">&#9888; Yield Trap — High yield with negative 1Y return</div>';
+
+  html+='<div class="modal-section"><div class="modal-section-title">Performance</div><div class="modal-grid">';
+  const perf=[
+    ['1Y Total Return',fmt(e.ret1y),cc(e.ret1y)],
+    ['6M',fmt(e.m6),cc(e.m6)],
+    ['YTD',fmt(e.ytd),cc(e.ytd)],
+    ['1M',fmt(e.m1),cc(e.m1)],
+    ['1W',fmt(e.w1),cc(e.w1)],
+    ['3Y Total Return',fmt(e.ret3y),cc(e.ret3y)],
+    ['3Y Perf',fmt(e.perf3y),cc(e.perf3y)],
+  ];
+  perf.forEach(([l,v,c])=>{ html+=`<div class="modal-stat"><div class="modal-stat-label">${l}</div><div class="modal-stat-value ${c}">${v}</div></div>`; });
+  html+='</div></div>';
+
+  html+='<div class="modal-section"><div class="modal-section-title">Dividend</div><div class="modal-grid">';
+  const divs=[
+    ['Yield TTM',e.yTTM.toFixed(2)+'%',''],
+    ['Yield FWD',e.yFWD.toFixed(2)+'%',''],
+    ['Frequency',e.freq,''],
+    ['Payout Date',e.payout||'—',''],
+    ['Ex-Div Date',e.exdiv||'—',''],
+  ];
+  divs.forEach(([l,v,c])=>{ html+=`<div class="modal-stat"><div class="modal-stat-label">${l}</div><div class="modal-stat-value ${c}">${v}</div></div>`; });
+  html+='</div></div>';
+
+  html+='<div class="modal-section"><div class="modal-section-title">Price & Technicals</div><div class="modal-grid">';
+  const tech=[
+    ['52W High',e.high52!==null?'$'+e.high52.toFixed(2):'—',''],
+    ['52W Low',e.low52!==null?'$'+e.low52.toFixed(2):'—',''],
+    ['50D SMA',e.sma50!==null?'$'+e.sma50.toFixed(2):'—',''],
+    ['vs 50D SMA',fmt(e.vs50),cc(e.vs50)],
+    ['200D SMA',e.sma200!==null?'$'+e.sma200.toFixed(2):'—',''],
+    ['vs 200D SMA',fmt(e.vs200),cc(e.vs200)],
+    ['RSI',e.rsi!==null?e.rsi.toFixed(1):'—',''],
+  ];
+  tech.forEach(([l,v,c])=>{ html+=`<div class="modal-stat"><div class="modal-stat-label">${l}</div><div class="modal-stat-value ${c}">${v}</div></div>`; });
+  html+='</div></div>';
+
+  html+='<div class="modal-section"><div class="modal-section-title">Fund Info</div><div class="modal-grid">';
+  const info=[
+    ['Issuer',e.issuer||'—',''],
+    ['Asset Class',e.ac||'—',''],
+    ['Fund Type',e.fund_type||'—',''],
+    ['AUM',e.aum!==null?'$'+fmtM(e.aum):'—',''],
+    ['Expense Ratio',e.exp!==null?e.exp.toFixed(2)+'%':'—',''],
+    ['Holdings',e.holdings!==null?Math.round(e.holdings).toString():'—',''],
+    ['Inception',e.inception||'—',''],
+  ];
+  info.forEach(([l,v,c])=>{ html+=`<div class="modal-stat"><div class="modal-stat-label">${l}</div><div class="modal-stat-value ${c}" style="font-size:12px;word-break:break-word">${v}</div></div>`; });
+  html+='</div></div>';
+
+  document.getElementById('modalBody').innerHTML=html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('modalClose').addEventListener('click',closeModal);
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+/* ── State ── */
+let sortCol='ret1y',sortDir=-1,topN=25;
+let filterFreq='All',filterRet='all',filterTrap=false,filterYield=0,filterSearch='',filterReturn1y=minReturn,filterReturn6m=min6m;
+
+document.getElementById('searchBox').addEventListener('input',e=>{filterSearch=e.target.value.toLowerCase();render();});
+
+document.querySelectorAll('[data-freq]').forEach(b=>b.addEventListener('click',()=>{
+  filterFreq=b.dataset.freq;
+  document.querySelectorAll('[data-freq]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');render();
+}));
+
+document.querySelectorAll('[data-ret]').forEach(b=>b.addEventListener('click',()=>{
+  filterRet=b.dataset.ret;filterTrap=false;
+  document.querySelectorAll('[data-ret]').forEach(x=>x.classList.remove('on'));
+  document.getElementById('trapBtn').classList.remove('trap-on');
+  b.classList.add('on');render();
+}));
+
+document.getElementById('trapBtn').addEventListener('click',()=>{
+  filterTrap=!filterTrap;
+  document.getElementById('trapBtn').classList.toggle('trap-on',filterTrap);
+  if(filterTrap){filterRet='all';document.querySelectorAll('[data-ret]').forEach(x=>x.classList.remove('on'));}
+  render();
+});
+
+ySlider.addEventListener('input',e=>{
+  filterYield=parseInt(e.target.value);
+  document.getElementById('yieldVal').textContent=filterYield===0?'0%':filterYield+'% \u2014 max '+maxYield+'%';
+  render();
+});
+
+rSlider.addEventListener('input',e=>{
+  filterReturn1y=parseInt(e.target.value);
+  const lv=document.getElementById('returnVal');
+  lv.textContent=filterReturn1y<=minReturn?'any':(filterReturn1y>=0?'+':'')+filterReturn1y+'% \u2014 max +'+maxReturn+'%';
+  render();
+});
+
+r6mSlider.addEventListener('input',e=>{
+  filterReturn6m=parseInt(e.target.value);
+  const lv=document.getElementById('return6mVal');
+  lv.textContent=filterReturn6m<=min6m?'any':(filterReturn6m>=0?'+':'')+filterReturn6m+'% \u2014 max +'+max6m+'%';
+  render();
+});
+
+document.querySelectorAll('.fb').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.fb').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');topN=parseInt(b.dataset.n);render();
+}));
+
+document.querySelectorAll('thead th[data-col]').forEach(th=>th.addEventListener('click',()=>{
+  const col=th.dataset.col;
+  if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=-1;}
+  document.querySelectorAll('thead th').forEach(t=>t.classList.remove('sort-asc','sort-desc'));
+  th.classList.add(sortDir===-1?'sort-desc':'sort-asc');
+  render();
+}));
+
+function applyFilters(){
+  return D.filter(e=>{
+    if(filterSearch&&!e.symbol.toLowerCase().includes(filterSearch)&&!e.name.toLowerCase().includes(filterSearch))return false;
+    if(filterFreq!=='All'&&e.freq!==filterFreq)return false;
+    if(filterRet==='pos'&&(e.ret1y===null||e.ret1y<=0))return false;
+    if(filterRet==='neg'&&(e.ret1y===null||e.ret1y>=0))return false;
+    if(filterTrap&&!isYT(e))return false;
+    if(e.yTTM<filterYield)return false;
+    if(e.ret1y!==null&&e.ret1y<filterReturn1y&&filterReturn1y>minReturn)return false;
+    if(e.m6<filterReturn6m)return false;
+    return true;
+  });
+}
+
+function render(){
+  const filtered=applyFilters();
+  filtered.sort((a,b)=>{
+    if(sortCol==='ret1y'){
+      if(a.ret1y===null&&b.ret1y===null)return 0;
+      if(a.ret1y===null)return sortDir===-1?1:-1;
+      if(b.ret1y===null)return sortDir===-1?-1:1;
+    }
+    const av=a[sortCol],bv=b[sortCol];
+    if(av===null&&bv===null)return 0;
+    if(av===null)return 1;if(bv===null)return -1;
+    if(typeof av==='string')return sortDir*av.localeCompare(bv);
+    return sortDir*(av-bv);
+  });
+
+  const traps=D.filter(isYT);
+  const ts=document.getElementById('trapStatus');
+  if(traps.length>0){
+    ts.style.cssText='color:var(--trap-txt);border-color:rgba(248,113,113,0.3);background:var(--trap-bg)';
+    ts.innerHTML='&#9888; '+traps.length+' yield trap'+(traps.length>1?'s':'');
+  } else {
+    ts.style.cssText='color:var(--pos);border-color:rgba(74,222,128,0.3);background:var(--pos-bg)';
+    ts.innerHTML='&#10003; No yield traps';
+  }
+
+  document.getElementById('resultCount').textContent=filtered.length+' / '+D.length+' ETFs';
+  const rows=filtered.slice(0,topN);
+  if(rows.length===0){
+    document.getElementById('tbody').innerHTML='<tr><td colspan="12" class="empty">No ETFs match the current filters.</td></tr>';
+    return;
+  }
+
+  document.getElementById('tbody').innerHTML=rows.map((e,i)=>{
+    const trap=isYT(e);
+    const ret1yCell=e.ret1y===null
+      ?'<span class="na">—</span>'
+      :'<span class="'+cc(e.ret1y)+'" style="font-weight:600">'+fmt(e.ret1y)+'</span>';
+    return '<tr class="'+(trap?'is-trap':'\"')+'\">'
+      +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
+      +'<button class="sym-btn" onclick="openModal(D.find(x=>x.symbol===\''+e.symbol.replace(/'/g,"\\'")+'\'&&x.name===\''+e.name.replace(/['"\\]/g,'').slice(0,20)+'\'))">'+e.symbol+'</button>'
+      +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
+      +'<td class="name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
+      +'<td class="r">$'+e.price.toFixed(2)+'</td>'
+      +'<td class="r"><span class="'+cc(e.chg)+'">'+fmt(e.chg)+'</span></td>'
+      +'<td class="r">'+ret1yCell+'</td>'
+      +'<td class="r"><span class="'+cc(e.ytd)+'">'+fmt(e.ytd)+'</span></td>'
+      +'<td class="r"><span class="'+cc(e.m1)+'">'+fmt(e.m1)+'</span></td>'
+      +'<td class="r"><span class="'+cc(e.m6)+'">'+fmt(e.m6)+'</span></td>'
+      +'<td class="r">'+e.yTTM.toFixed(2)+'%</td>'
+      +'<td class="r">'+e.yFWD.toFixed(2)+'%</td>'
+      +'<td><span class="fp">'+e.freq+'</span></td>'
+      +'</tr>';
+  }).join('');
+
+  // Wire up symbol buttons properly (avoid inline onclick issues with special chars)
+  document.querySelectorAll('.sym-btn').forEach((btn,i)=>{
+    btn.onclick=()=>openModal(rows[i]);
+  });
+}
+
+render();
+
+/* ── Watchlist ── */
+let watchlist = new Set(JSON.parse(localStorage.getItem('hybtr-watchlist') || '[]'));
+
+function saveWatchlist(){
+  localStorage.setItem('hybtr-watchlist', JSON.stringify([...watchlist]));
+  updateWatchCount();
+}
+
+function updateWatchCount(){
+  const cnt = document.getElementById('watchCount');
+  cnt.textContent = watchlist.size > 0 ? watchlist.size : '';
+}
+
+function toggleStar(evt, symbol){
+  evt.stopPropagation();
+  if(watchlist.has(symbol)) watchlist.delete(symbol);
+  else watchlist.add(symbol);
+  saveWatchlist();
+  render();
+  renderWatchlist();
+}
+
+function renderWatchlist(){
+  const items = D.filter(e => watchlist.has(e.symbol));
+  const empty = document.getElementById('watchlistEmpty');
+  const table = document.getElementById('watchlistTable');
+  if(items.length === 0){
+    empty.style.display = 'block';
+    table.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  table.style.display = 'block';
+  items.sort((a,b)=>{
+    if(a.ret1y===null&&b.ret1y===null)return 0;
+    if(a.ret1y===null)return 1;
+    if(b.ret1y===null)return -1;
+    return b.ret1y-a.ret1y;
+  });
+  document.getElementById('watchlistBody').innerHTML = items.map((e,i)=>{
+    const trap=isYT(e);
+    const ret1yCell=e.ret1y===null
+      ?'<span class="na">—</span>'
+      :'<span class="'+cc(e.ret1y)+'" style="font-weight:600">'+fmt(e.ret1y)+'</span>';
+    return '<tr class="'+(trap?'is-trap':'')+'">'
+      +'<td style="padding:8px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
+      +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
+      +'<button class="sym-btn" onclick="openModal(D.find(x=>x.symbol===\''+e.symbol+'\'))">'+e.symbol+'</button>'
+      +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
+      +'<td class="fnm name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
+      +'<td class="r">$'+e.price.toFixed(2)+'</td>'
+      +'<td class="r"><span class="'+cc(e.chg)+'">'+fmt(e.chg)+'</span></td>'
+      +'<td class="r">'+ret1yCell+'</td>'
+      +'<td class="r"><span class="'+cc(e.ytd)+'">'+fmt(e.ytd)+'</span></td>'
+      +'<td class="r"><span class="'+cc(e.m1)+'">'+fmt(e.m1)+'</span></td>'
+      +'<td class="r"><span class="'+cc(e.m6)+'">'+fmt(e.m6)+'</span></td>'
+      +'<td class="r">'+e.yTTM.toFixed(2)+'%</td>'
+      +'<td class="r">'+e.yFWD.toFixed(2)+'%</td>'
+      +'<td><span class="fp">'+e.freq+'</span></td>'
+      +'</tr>';
+  }).join('');
+
+  // Re-wire modal buttons
+  document.querySelectorAll('#watchlistBody .sym-btn').forEach((btn,i)=>{
+    btn.onclick=()=>openModal(items[i]);
+  });
+}
+
+document.getElementById('clearWatchlist').addEventListener('click',()=>{
+  if(watchlist.size===0)return;
+  if(confirm('Clear all '+watchlist.size+' ETFs from your watchlist?')){
+    watchlist.clear();
+    saveWatchlist();
+    render();
+    renderWatchlist();
+  }
+});
+
+// Tab switch — render watchlist when tab is opened
+document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>{
+  if(t.dataset.tab==='watchlist') renderWatchlist();
+}));
+
+updateWatchCount();
+renderWatchlist();
+</script>
+</body>
+</html>
