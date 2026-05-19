@@ -625,6 +625,8 @@ function render(){
   });
 }
 
+let watchlist = new Set(JSON.parse(localStorage.getItem('hybtr-watchlist') || '[]'));
+
 render();
 
 /* ── Watchlist ── */
