@@ -71,9 +71,9 @@
   .fb:hover{border-color:var(--txt2);color:var(--txt)}
   .fb.active{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:500}
   .trap-pill{font-size:12px;font-family:var(--mono);display:flex;align-items:center;gap:5px;margin-left:auto;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r)}
-  .tw{border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
-  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}
-  thead th{background:var(--surface3);font-size:10px;font-weight:600;color:var(--txt3);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;user-select:none}
+  .tw{border:1px solid var(--border);border-radius:var(--rl);overflow:auto}
+  table{width:100%;border-collapse:collapse;table-layout:auto;font-size:12px}
+  thead th{background:var(--surface3);font-size:10px;font-weight:600;color:var(--txt3);text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;cursor:pointer;user-select:none}
   thead th.r{text-align:right}
   thead th:hover{color:var(--txt)}
   thead th.sort-asc::after{content:" ↑";color:var(--lime)}
@@ -82,7 +82,7 @@
   tbody tr:last-child{border-bottom:none}
   tbody tr:hover{background:var(--surface2)}
   tbody tr.is-trap{background:rgba(248,113,113,0.04)}
-  td{padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono)}
+  td{padding:7px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono);font-size:12px}
   td.name-cell{font-family:var(--font)}
   td.r{text-align:right}
   .sc{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden;min-width:0}
@@ -97,7 +97,7 @@
   .star-btn.starred{color:var(--lime)}
   .na{color:var(--txt3);font-size:12px}
   .empty{padding:2.5rem;text-align:center;color:var(--txt3);font-size:13px}
-  .col-r{width:11%}.col-n{width:17%}.col-p{width:6%}.col-c{width:6%}.col-1y{width:9%}.col-ytd{width:6%}.col-1m{width:6%}.col-6m{width:6%}.col-yt{width:8%}.col-yf{width:8%}.col-fr{width:8%}
+  .col-r{min-width:90px}.col-n{min-width:140px;max-width:180px}.col-p{min-width:55px}.col-c{min-width:55px}.col-1y{min-width:80px}.col-ytd{min-width:55px}.col-1m{min-width:55px}.col-6m{min-width:55px}.col-yt{min-width:70px}.col-yf{min-width:70px}.col-fr{min-width:70px}
 
   /* ── MODAL ── */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem}
@@ -149,7 +149,7 @@
 
 <nav>
   <div class="nav-brand">
-    <img src="logo.png" alt="High-Yield, Best Total Return ETF's" style="height:52px;width:auto;display:block;">
+    <a href="#" onclick="switchTab('dashboard');return false;" style="display:block;line-height:0"><img src="logo.png" alt="High-Yield, Best Total Return ETF's" style="height:52px;width:auto;display:block;cursor:pointer"></a>
     <div class="brand-slogan" style="font-size:12px;font-style:italic;color:#b8cfe8;margin-left:10px;white-space:nowrap">Total return is what really matters.</div>
   </div>
   <div class="nav-tabs">
@@ -263,17 +263,17 @@
     <div class="tw" id="watchlistTable" style="display:none"><table>
       <thead><tr>
         <th style="width:4%"></th>
-        <th class="col-r" data-col="symbol" style="width:11%">#&nbsp; Symbol</th>
-        <th class="col-n name-cell" data-col="name" style="width:17%">Fund name</th>
-        <th class="col-p r" data-col="price" style="width:6%">Price</th>
-        <th class="col-c r" data-col="chg" style="width:6%">Day %</th>
-        <th class="col-1y r" data-col="ret1y" style="width:9%">1Y Total Return</th>
-        <th class="col-ytd r" data-col="ytd" style="width:7%">YTD</th>
-        <th class="col-1m r" data-col="m1" style="width:6%">1M</th>
-        <th class="col-6m r" data-col="m6" style="width:6%">6M</th>
-        <th class="col-yt r" data-col="yTTM" style="width:8%">Yield TTM</th>
-        <th class="col-yf r" data-col="yFWD" style="width:8%">Yield FWD</th>
-        <th class="col-fr" data-col="freq" style="width:8%">Frequency</th>
+        <th class="col-r" data-col="symbol">#&nbsp; Symbol</th>
+        <th class="col-n name-cell" data-col="name">Fund name</th>
+        <th class="col-p r" data-col="price" >Price</th>
+        <th class="col-c r" data-col="chg" >Day %</th>
+        <th class="col-1y r" data-col="ret1y" >1Y Total Return</th>
+        <th class="col-ytd r" data-col="ytd" >YTD</th>
+        <th class="col-1m r" data-col="m1" >1M</th>
+        <th class="col-6m r" data-col="m6" >6M</th>
+        <th class="col-yt r" data-col="yTTM" >Yield TTM</th>
+        <th class="col-yf r" data-col="yFWD" >Yield FWD</th>
+        <th class="col-fr" data-col="freq" >Frequency</th>
       </tr></thead>
       <tbody id="watchlistBody"></tbody>
     </table></div>
@@ -485,7 +485,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 let sortCol='ret1y',sortDir=-1,topN=25;
 let filterFreq='All',filterRet='all',filterTrap=false,filterYield=0,filterSearch='',filterReturn1y=minReturn,filterReturn6m=min6m;
 
-document.getElementById('searchBox').addEventListener('input',e=>{filterSearch=e.target.value.toLowerCase();render();});
+document.getElementById('searchBox').addEventListener('input',e=>{filterSearch=e.target.value.toLowerCase();render();
+
+function switchTab(name){
+  document.querySelectorAll('.ntab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+  const t=document.querySelector('.ntab[data-tab="'+name+'"]');
+  if(t) t.classList.add('active');
+  const p=document.getElementById('tab-'+name);
+  if(p) p.classList.add('active');
+  if(name==='watchlist') renderWatchlist();
+}});
 
 document.querySelectorAll('[data-freq]').forEach(b=>b.addEventListener('click',()=>{
   filterFreq=b.dataset.freq;
