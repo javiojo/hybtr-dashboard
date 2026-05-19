@@ -72,8 +72,8 @@
   .fb.active{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:500}
   .trap-pill{font-size:12px;font-family:var(--mono);display:flex;align-items:center;gap:5px;margin-left:auto;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r)}
   .tw{border:1px solid var(--border);border-radius:var(--rl);overflow:auto}
-  table{width:100%;border-collapse:collapse;table-layout:auto;font-size:12px}
-  thead th{background:var(--surface3);font-size:10px;font-weight:600;color:var(--txt3);text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;cursor:pointer;user-select:none}
+  table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:12px}
+  thead th{background:var(--surface3);font-size:10px;font-weight:600;color:var(--txt3);text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;user-select:none}
   thead th.r{text-align:right}
   thead th:hover{color:var(--txt)}
   thead th.sort-asc::after{content:" ↑";color:var(--lime)}
@@ -82,7 +82,7 @@
   tbody tr:last-child{border-bottom:none}
   tbody tr:hover{background:var(--surface2)}
   tbody tr.is-trap{background:rgba(248,113,113,0.04)}
-  td{padding:7px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono);font-size:12px}
+  td{padding:7px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono);font-size:12px;vertical-align:middle}
   td.name-cell{font-family:var(--font)}
   td.r{text-align:right}
   .sc{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;overflow:hidden;min-width:0}
@@ -97,7 +97,7 @@
   .star-btn.starred{color:var(--lime)}
   .na{color:var(--txt3);font-size:12px}
   .empty{padding:2.5rem;text-align:center;color:var(--txt3);font-size:13px}
-  .col-r{min-width:90px}.col-n{min-width:140px;max-width:180px}.col-p{min-width:55px}.col-c{min-width:55px}.col-1y{min-width:80px}.col-ytd{min-width:55px}.col-1m{min-width:55px}.col-6m{min-width:55px}.col-yt{min-width:70px}.col-yf{min-width:70px}.col-fr{min-width:70px}
+  .col-star{width:3%}.col-r{width:10%}.col-n{width:18%}.col-p{width:6%}.col-c{width:6%}.col-1y{width:10%}.col-ytd{width:6%}.col-1m{width:6%}.col-6m{width:6%}.col-yt{width:8%}.col-yf{width:8%}.col-fr{width:8%}
 
   /* ── MODAL ── */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem}
@@ -230,7 +230,7 @@
     </div>
     <div class="tw"><table>
       <thead><tr>
-        <th style="width:3%;padding:8px 4px"></th>
+        <th class="col-star" style="padding:7px 4px"></th>
         <th class="col-r" data-col="symbol">#&nbsp; Symbol</th>
         <th class="col-n name-cell" data-col="name">Fund name</th>
         <th class="col-p r" data-col="price">Price</th>
