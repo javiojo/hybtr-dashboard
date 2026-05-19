@@ -199,6 +199,12 @@
         <button class="pill" data-freq="Annual">Annual</button>
       </div>
       <div class="filter-row">
+        <span class="flabel">Country</span>
+        <button class="pill on" data-country="All">All</button>
+        <button class="pill" data-country="US">🇺🇸 US only</button>
+        <button class="pill" data-country="CA">🇨🇦 Canada only</button>
+      </div>
+      <div class="filter-row">
         <span class="flabel">1Y Return</span>
         <button class="pill on" data-ret="all">All</button>
         <button class="pill" data-ret="pos">Positive only</button>
@@ -323,6 +329,7 @@
           <li>Dynamic 1Y Return slider — minimum threshold filter</li>
           <li>Dynamic 6M Return slider — minimum 6-month performance filter</li>
           <li>Dynamic Yield TTM slider — range scales to today's highest yield</li>
+          <li>Country filter — view All, US only, or Canadian ETFs only</li>
           <li>Live result count showing filtered ETF count vs. total</li>
           <li>Top 10 / 25 / 50 / All quick view controls</li>
           <li>Yield trap counter across the full dataset</li>
@@ -483,7 +490,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 /* ── State ── */
 let sortCol='ret1y',sortDir=-1,topN=25;
-let filterFreq='All',filterRet='all',filterTrap=false,filterYield=0,filterSearch='',filterReturn1y=minReturn,filterReturn6m=min6m;
+let filterFreq='All',filterRet='all',filterTrap=false,filterYield=0,filterSearch='',filterReturn1y=minReturn,filterReturn6m=min6m,filterCountry='All';
 
 document.getElementById('searchBox').addEventListener('input',e=>{filterSearch=e.target.value.toLowerCase();render();
 
@@ -500,6 +507,12 @@ function switchTab(name){
 document.querySelectorAll('[data-freq]').forEach(b=>b.addEventListener('click',()=>{
   filterFreq=b.dataset.freq;
   document.querySelectorAll('[data-freq]').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');render();
+}));
+
+document.querySelectorAll('[data-country]').forEach(b=>b.addEventListener('click',()=>{
+  filterCountry=b.dataset.country;
+  document.querySelectorAll('[data-country]').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');render();
 }));
 
@@ -560,6 +573,9 @@ function applyFilters(){
     if(e.yTTM<filterYield)return false;
     if(e.ret1y!==null&&e.ret1y<filterReturn1y&&filterReturn1y>minReturn)return false;
     if(e.m6<filterReturn6m)return false;
+    const isCA=e.symbol.includes(':CA');
+    if(filterCountry==='US'&&isCA)return false;
+    if(filterCountry==='CA'&&!isCA)return false;
     return true;
   });
 }
