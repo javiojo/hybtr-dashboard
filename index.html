@@ -630,7 +630,7 @@ let watchlist = new Set(JSON.parse(localStorage.getItem('hybtr-watchlist') || '[
 render();
 
 /* ── Watchlist ── */
-let watchlist = new Set(JSON.parse(localStorage.getItem('hybtr-watchlist') || '[]'));
+// watchlist already declared above
 
 function saveWatchlist(){
   localStorage.setItem('hybtr-watchlist', JSON.stringify([...watchlist]));
