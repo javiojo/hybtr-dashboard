@@ -410,8 +410,9 @@ function buildCard(el,e,badgeClass,icon,lbl){
     +'<div class="si"><div class="sl">Price</div><div class="sv" style="font-size:12px">$'+e.price.toFixed(2)+'</div></div>'
     +'</div>';
 }
-buildCard(document.getElementById('heroTop'),D[0],'top','▲','Top 1Y Performer');
-buildCard(document.getElementById('heroWorst'),D[D.length-1],'worst','▼','Worst 1Y Performer');
+const ranked=D.filter(e=>e.ret1y!==null);
+buildCard(document.getElementById('heroTop'),ranked[0],'top','▲','Top 1Y Performer');
+buildCard(document.getElementById('heroWorst'),ranked[ranked.length-1],'worst','▼','Worst 1Y Performer');
 
 /* ── Modal ── */
 function openModal(e){
