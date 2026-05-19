@@ -134,6 +134,17 @@
   .feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
   @media(max-width:600px){.feature-grid{grid-template-columns:1fr}}
   .trap-rule{display:inline-flex;align-items:center;gap:8px;background:var(--trap-bg);color:var(--trap-txt);border:1px solid rgba(248,113,113,0.25);border-radius:var(--r);padding:6px 12px;font-size:12px;font-weight:600;margin-top:6px;font-family:var(--mono)}
+  .signup-bar{background:var(--navy-mid);border:1px solid var(--lime-dim);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-top:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  .signup-left{display:flex;flex-direction:column;gap:4px}
+  .signup-title{font-size:14px;font-weight:600;color:var(--lime)}
+  .signup-sub{font-size:12px;color:var(--txt2)}
+  .signup-form{display:flex;gap:8px;flex-wrap:wrap}
+  .signup-input{font-family:var(--font);font-size:13px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);width:240px;outline:none}
+  .signup-input:focus{border-color:var(--lime);box-shadow:0 0 0 2px var(--lime-glow)}
+  .signup-btn{font-family:var(--font);font-size:13px;font-weight:600;padding:8px 20px;border-radius:var(--r);border:none;background:var(--lime);color:var(--navy-deep);cursor:pointer;white-space:nowrap;transition:opacity .15s}
+  .signup-btn:hover{opacity:.88}
+  .signup-note{font-size:11px;color:var(--txt3);margin-top:4px}
+  .signup-success{display:none;font-size:13px;color:var(--lime);font-weight:500}
   footer{margin-top:1.5rem;padding:.875rem 1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);font-size:13px;color:#b8cfe8;line-height:1.9}
   footer strong{color:var(--txt2)}
   .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)}
@@ -337,6 +348,22 @@
           <li>Dark mode design — optimized for long sessions</li>
         </ul>
       </div>
+    </div>
+  </div>
+
+  <!-- Email signup bar -->
+  <div class="signup-bar">
+    <div class="signup-left">
+      <div class="signup-title">📈 Get the Weekly HYBTR Top 10</div>
+      <div class="signup-sub">Free weekly digest — top ETFs by total return, yield trap alerts, and market insights.</div>
+      <div class="signup-note">No spam. Unsubscribe anytime.</div>
+    </div>
+    <div>
+      <div class="signup-form">
+        <input type="email" class="signup-input" id="signupEmail" placeholder="your@email.com">
+        <button class="signup-btn" onclick="handleSignup()">Subscribe Free</button>
+      </div>
+      <div class="signup-success" id="signupSuccess">✓ You're on the list! Check your inbox.</div>
     </div>
   </div>
 
@@ -731,6 +758,25 @@ document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>{
 
 updateWatchCount();
 renderWatchlist();
+
+/* ── Email signup ── */
+function handleSignup(){
+  const email = document.getElementById('signupEmail').value.trim();
+  if(!email || !email.includes('@')){
+    document.getElementById('signupEmail').focus();
+    document.getElementById('signupEmail').style.borderColor='var(--neg)';
+    return;
+  }
+  document.getElementById('signupEmail').style.borderColor='';
+  // TODO: Replace with your Beehiiv / Mailchimp / ConvertKit form action URL
+  // For now, show success message
+  document.querySelector('.signup-form').style.display='none';
+  document.getElementById('signupSuccess').style.display='block';
+  console.log('Signup:', email); // Remove when wired to real provider
+}
+document.getElementById('signupEmail').addEventListener('keydown',e=>{
+  if(e.key==='Enter') handleSignup();
+});
 </script>
 </body>
 </html>
