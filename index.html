@@ -759,20 +759,47 @@ document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>{
 updateWatchCount();
 renderWatchlist();
 
-/* ── Email signup ── */
-function handleSignup(){
-  const email = document.getElementById('signupEmail').value.trim();
+/* ── Email signup — MailerLite API ── */
+const ML_TOKEN='eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiYTI2OWZlNDFjYzZjYWNlOTg1NWVjOTRjNmUxMDI3OWRlZjQ2ODMwOGQ5YzRiMmU1OTZjNGFiNzgzZjEyOWZkZTM1MGUyYTRjNGNiMTkyOGYiLCJpYXQiOjE3NzkyNTMzMTkuNzYyMjMyLCJuYmYiOjE3NzkyNTMzMTkuNzYyMjM0LCJleHAiOjQ5MzQ5MjY5MTkuNzU3NjI1LCJzdWIiOiIyMzgyNDIwIiwic2NvcGVzIjpbXX0.jE7os2-YCJACgS-LYQkSvbUPexiq24ZQoy6QKJtlgZTfymub9gwlThXkJ7LZoZwRiUruw8WjexP2vpGPcb_fnfM3SyV1zwLvhEij1eUH7cFPd7BNwzGoVGhpWHFCZjT5GHPF1RhdQNLg5zWvnGz_1j0TE7bjwN_UnDZU71xu-tg8b4WIaP6Cng1rN7yZIDtbTtA2uKHU16zo0tUTTZYmEB14T_iK-1a0GjF1kHeGZV-nYCnv3NbGLEFqPH78P8WACrckuAJj2o4SCOO6wPZcgIJWQiXJXPK-kB_WjMgl5LLMjwiwKkqK41Gu_aLIX5YqwqKDvqsB1o0mtIolV-YeAkcawsDd8qjLyvHbQ4WSYdD0IB1pOz2aLjOadTHX8pHx-CHN60T3EGEF5NqwmkQXsO_2TVNKrlimT26G7Y9yLTeZteRKqRqeOkkdugUzEQSDTOmbyVOSZVOwDaeLvg3aqzLCz1_l_VMmS0pOJ6szZPUTVAj0Rs8qFmsznuSHEJPJOQ2COJY_ZkMyXGtlRRKh5oDU1XZ9zF1CIg5nNcaHmEZbVKX3ciBwDW73kZV08naLsvzJCE6s8wnGHsJnh1VX60BuvZOdzfNWSSv9kDCz0gRNuOwg-g5ZxP1CoIfC76QROczleEBW97k7fsldpPNHhPQK8NcpfM0e7G7kgNa0gJI';
+const ML_GROUP='187947608914789971';
+
+async function handleSignup(){
+  const emailEl = document.getElementById('signupEmail');
+  const btn = document.querySelector('.signup-btn');
+  const email = emailEl.value.trim();
   if(!email || !email.includes('@')){
-    document.getElementById('signupEmail').focus();
-    document.getElementById('signupEmail').style.borderColor='var(--neg)';
+    emailEl.style.borderColor='var(--neg)';
+    emailEl.focus();
     return;
   }
-  document.getElementById('signupEmail').style.borderColor='';
-  // TODO: Replace with your Beehiiv / Mailchimp / ConvertKit form action URL
-  // For now, show success message
-  document.querySelector('.signup-form').style.display='none';
-  document.getElementById('signupSuccess').style.display='block';
-  console.log('Signup:', email); // Remove when wired to real provider
+  emailEl.style.borderColor='';
+  btn.textContent='Subscribing...';
+  btn.disabled=true;
+  try {
+    const res = await fetch('https://connect.mailerlite.com/api/subscribers', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json','Authorization':'Bearer '+ML_TOKEN},
+      body: JSON.stringify({email, groups:[ML_GROUP]})
+    });
+    const data = await res.json();
+    if(res.ok || res.status===200 || res.status===201){
+      document.querySelector('.signup-form').style.display='none';
+      document.getElementById('signupSuccess').style.display='block';
+    } else if(res.status===409 || (data.message && data.message.toLowerCase().includes('already'))){
+      document.querySelector('.signup-form').style.display='none';
+      document.getElementById('signupSuccess').textContent='✓ You are already subscribed!';
+      document.getElementById('signupSuccess').style.display='block';
+    } else {
+      btn.textContent='Subscribe Free';
+      btn.disabled=false;
+      emailEl.style.borderColor='var(--neg)';
+      alert('Something went wrong. Please try again.');
+    }
+  } catch(e) {
+    btn.textContent='Subscribe Free';
+    btn.disabled=false;
+    alert('Network error. Please try again.');
+  }
 }
 document.getElementById('signupEmail').addEventListener('keydown',e=>{
   if(e.key==='Enter') handleSignup();
