@@ -354,8 +354,8 @@
   <!-- Email signup bar -->
   <div class="signup-bar">
     <div class="signup-left">
-      <div class="signup-title">📈 Get the Weekly HYBTR Top 10</div>
-      <div class="signup-sub">Free weekly digest — top ETFs by total return, yield trap alerts, and market insights.</div>
+      <div class="signup-title">📈 HY:BTR Weekly Top 50 ETF's — Monday Digest</div>
+      <div class="signup-sub">Free every Monday — Top 50 high-yield ETFs from US &amp; Canada ranked by total return, plus yield trap alerts.</div>
       <div class="signup-note">No spam. Unsubscribe anytime.</div>
     </div>
     <div>
@@ -363,7 +363,7 @@
         <input type="email" class="signup-input" id="signupEmail" placeholder="your@email.com">
         <button class="signup-btn" onclick="handleSignup()">Subscribe Free</button>
       </div>
-      <div class="signup-success" id="signupSuccess">✓ You're on the list! Check your inbox.</div>
+      <div class="signup-success" id="signupSuccess">✓ You're on the list! Your first Top 50 digest lands Monday.</div>
     </div>
   </div>
 
@@ -787,7 +787,7 @@ async function handleSignup(){
       document.getElementById('signupSuccess').style.display='block';
     } else if(res.status===409 || (data.message && data.message.toLowerCase().includes('already'))){
       document.querySelector('.signup-form').style.display='none';
-      document.getElementById('signupSuccess').textContent='✓ You are already subscribed!';
+      document.getElementById('signupSuccess').textContent='✓ Already subscribed — see you Monday!';
       document.getElementById('signupSuccess').style.display='block';
     } else {
       btn.textContent='Subscribe Free';
