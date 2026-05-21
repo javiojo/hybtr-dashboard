@@ -153,6 +153,7 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
@@ -160,12 +161,16 @@
 
 <nav>
   <div class="nav-brand">
-    <a href="#" onclick="switchTab('dashboard');return false;" style="display:block;line-height:0"><img src="logo.png" alt="High-Yield, Best Total Return ETF's" style="height:52px;width:auto;display:block;cursor:pointer"></a>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="#" onclick="switchTab('dashboard');return false;" style="display:block;line-height:0"><img src="logo.png" alt="High-Yield, Best Total Return ETF's" style="height:52px;width:auto;display:block;cursor:pointer"></a>
+      <span style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(211,224,80,0.15);color:var(--lime);border:1px solid rgba(211,224,80,0.4);border-radius:4px;padding:3px 8px;white-space:nowrap">BETA</span>
+    </div>
     <div class="brand-slogan" style="font-size:12px;font-style:italic;color:#b8cfe8;margin-left:10px;white-space:nowrap">Total return is what really matters.</div>
   </div>
   <div class="nav-tabs">
     <button class="ntab active" data-tab="dashboard">Dashboard</button>
     <button class="ntab" data-tab="watchlist">&#9733; Watchlist <span id="watchCount" style="font-size:10px;background:var(--lime-dim);color:var(--lime);border-radius:10px;padding:1px 6px;margin-left:4px"></span></button>
+    <button class="ntab" data-tab="contact">Contact Us</button>
     <button class="ntab" data-tab="about">Strategy &amp; Features</button>
   </div>
   <div class="nav-meta" id="navMeta">Data: May 21, 2026</div>
@@ -296,6 +301,56 @@
     </table></div>
   </div>
 
+    <div class="tab-panel" id="tab-contact">
+    <div style="max-width:640px;margin:0 auto">
+      <div style="margin-bottom:1.5rem">
+        <div style="font-size:18px;font-weight:600;color:var(--txt);margin-bottom:6px">Contact Us</div>
+        <div style="font-size:13px;color:var(--txt2)">Have a question, suggestion, or just want to say hello? We'd love to hear from you.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem">
+        <div style="display:flex;flex-direction:column;gap:16px" id="contactForm">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <label style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:6px">Name *</label>
+              <input type="text" id="c_name" placeholder="Your name" style="width:100%;font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);outline:none">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:6px">Email *</label>
+              <input type="email" id="c_email" placeholder="your@email.com" style="width:100%;font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);outline:none">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:6px">Type</label>
+            <select id="c_type" style="width:100%;font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);outline:none">
+              <option value="General Inquiry">General Inquiry</option>
+              <option value="Feature Request">Feature Request</option>
+              <option value="Bug Report">Bug Report</option>
+              <option value="Partnership">Partnership</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:6px">Message *</label>
+            <textarea id="c_message" rows="5" placeholder="Tell us what's on your mind..." style="width:100%;font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);outline:none;resize:vertical"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--lime-dim);border:1px solid rgba(211,224,80,0.2);border-radius:var(--r)">
+            <input type="checkbox" id="c_newsletter" checked style="width:16px;height:16px;accent-color:var(--lime);flex-shrink:0;cursor:pointer">
+            <label for="c_newsletter" style="font-size:13px;color:var(--txt2);cursor:pointer">Subscribe to the <strong style="color:var(--lime)">HY:BTR Weekly Top 50</strong> — free Monday digest</label>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div style="font-size:11px;color:var(--txt3)">* Required fields</div>
+            <button onclick="submitContact()" style="font-family:var(--font);font-size:13px;font-weight:600;padding:10px 28px;border-radius:var(--r);border:none;background:var(--lime);color:var(--navy-deep);cursor:pointer" id="contactBtn">Send Message</button>
+          </div>
+          <div id="contactSuccess" style="display:none;text-align:center;padding:1.5rem;background:var(--pos-bg);border:1px solid rgba(74,222,128,.25);border-radius:var(--r)">
+            <div style="font-size:22px;margin-bottom:8px">✓</div>
+            <div style="font-size:15px;font-weight:600;color:var(--pos)">Message sent!</div>
+            <div style="font-size:13px;color:var(--txt2);margin-top:4px">We'll get back to you at the email you provided.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <div class="tab-panel" id="tab-about">
     <div class="about">
       <div class="about-card">
@@ -364,6 +419,36 @@
         <button class="signup-btn" onclick="handleSignup()">Subscribe Free</button>
       </div>
       <div class="signup-success" id="signupSuccess">✓ You're on the list! Your first Top 50 digest lands Monday.</div>
+    </div>
+  </div>
+
+  <!-- Feature Request floating button -->
+  <button id="frBtn" onclick="openFR()" style="position:fixed;bottom:28px;right:28px;z-index:400;background:var(--lime);color:var(--navy-deep);border:none;border-radius:50px;padding:12px 20px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(211,224,80,0.35);display:flex;align-items:center;gap:7px">
+    <span style="font-size:16px">💡</span> Feature Request
+  </button>
+
+  <!-- Feature Request modal -->
+  <div id="frOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:450;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:var(--navy-dark);border:1px solid var(--border2);border-radius:var(--rl);width:100%;max-width:500px;padding:1.75rem;position:relative">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--lime)">💡 Feature Request</div>
+          <div style="font-size:12px;color:var(--txt2);margin-top:3px">Got an idea to make HYBTR better?</div>
+        </div>
+        <button onclick="closeFR()" style="background:none;border:1px solid var(--border2);border-radius:var(--r);color:var(--txt2);cursor:pointer;font-size:18px;padding:2px 8px;line-height:1">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:6px">Your email</label>
+          <input type="email" id="fr_email" placeholder="your@email.com" style="width:100%;font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3);display:block;margin-bottom:6px">Your idea *</label>
+          <textarea id="fr_message" rows="4" placeholder="Describe the feature you'd like to see..." style="width:100%;font-family:var(--font);font-size:13px;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);color:var(--txt);outline:none;resize:vertical"></textarea>
+        </div>
+        <div id="frSuccess" style="display:none;text-align:center;padding:1rem;background:var(--pos-bg);border:1px solid rgba(74,222,128,.25);border-radius:var(--r);color:var(--pos);font-weight:600">✓ Thanks! We'll review your idea.</div>
+        <button onclick="submitFR()" id="frSubmitBtn" style="font-family:var(--font);font-size:13px;font-weight:600;padding:10px;border-radius:var(--r);border:none;background:var(--lime);color:var(--navy-deep);cursor:pointer">Submit Idea</button>
+      </div>
     </div>
   </div>
 
@@ -758,6 +843,81 @@ document.querySelectorAll('.ntab').forEach(t=>t.addEventListener('click',()=>{
 
 updateWatchCount();
 renderWatchlist();
+
+/* ── EmailJS init ── */
+emailjs.init('qbtAJmgLL_4I91TsC');
+const EJ_SVC  = 'service_fuoyjis';
+const EJ_TPL  = 'template_ytgq3gg';
+const ML_TOKEN_2 = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiYTI2OWZlNDFjYzZjYWNlOTg1NWVjOTRjNmUxMDI3OWRlZjQ2ODMwOGQ5YzRiMmU1OTZjNGFiNzgzZjEyOWZkZTM1MGUyYTRjNGNiMTkyOGYiLCJpYXQiOjE3NzkyNTMzMTkuNzYyMjMyLCJuYmYiOjE3NzkyNTMzMTkuNzYyMjM0LCJleHAiOjQ5MzQ5MjY5MTkuNzU3NjI1LCJzdWIiOiIyMzgyNDIwIiwic2NvcGVzIjpbXX0.jE7os2-YCJACgS-LYQkSvbUPexiq24ZQoy6QKJtlgZTfymub9gwlThXkJ7LZoZwRiUruw8WjexP2vpGPcb_fnfM3SyV1zwLvhEij1eUH7cFPd7BNwzGoVGhpWHFCZjT5GHPF1RhdQNLg5zWvnGz_1j0TE7bjwN_UnDZU71xu-tg8b4WIaP6Cng1rN7yZIDtbTtA2uKHU16zo0tUTTZYmEB14T_iK-1a0GjF1kHeGZV-nYCnv3NbGLEFqPH78P8WACrckuAJj2o4SCOO6wPZcgIJWQiXJXPK-kB_WjMgl5LLMjwiwKkqK41Gu_aLIX5YqwqKDvqsB1o0mtIolV-YeAkcawsDd8qjLyvHbQ4WSYdD0IB1pOz2aLjOadTHX8pHx-CHN60T3EGEF5NqwmkQXsO_2TVNKrlimT26G7Y9yLTeZteRKqRqeOkkdugUzEQSDTOmbyVOSZVOwDaeLvg3aqzLCz1_l_VMmS0pOJ6szZPUTVAj0Rs8qFmsznuSHEJPJOQ2COJY_ZkMyXGtlRRKh5oDU1XZ9zF1CIg5nNcaHmEZbVKX3ciBwDW73kZV08naLsvzJCE6s8wnGHsJnh1VX60BuvZOdzfNWSSv9kDCz0gRNuOwg-g5ZxP1CoIfC76QROczleEBW97k7fsldpPNHhPQK8NcpfM0e7G7kgNa0gJI';
+const ML_GROUP_2 = '187947608914789971';
+
+/* ── Contact form ── */
+async function submitContact(){
+  const name    = document.getElementById('c_name').value.trim();
+  const email   = document.getElementById('c_email').value.trim();
+  const type    = document.getElementById('c_type').value;
+  const message = document.getElementById('c_message').value.trim();
+  const newsletter = document.getElementById('c_newsletter').checked;
+  if(!name||!email||!message){
+    alert('Please fill in all required fields.');
+    return;
+  }
+  const btn = document.getElementById('contactBtn');
+  btn.textContent='Sending...'; btn.disabled=true;
+  try {
+    await emailjs.send(EJ_SVC, EJ_TPL, {
+      from_name: name, from_email: email,
+      message_type: type, message: message,
+      newsletter: newsletter ? 'Yes — subscribed' : 'No'
+    });
+    if(newsletter){
+      await fetch('https://connect.mailerlite.com/api/subscribers',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json','Authorization':'Bearer '+ML_TOKEN_2},
+        body: JSON.stringify({email, name, groups:[ML_GROUP_2], fields:{last_name: type}})
+      });
+    }
+    document.getElementById('contactForm').style.display='none';
+    document.getElementById('contactSuccess').style.display='block';
+  } catch(e){
+    btn.textContent='Send Message'; btn.disabled=false;
+    alert('Something went wrong. Please try again.');
+  }
+}
+
+/* ── Feature Request modal ── */
+function openFR(){ document.getElementById('frOverlay').style.display='flex'; document.body.style.overflow='hidden'; }
+function closeFR(){ document.getElementById('frOverlay').style.display='none'; document.body.style.overflow=''; }
+document.getElementById('frOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeFR(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeFR(); closeModal(); } });
+
+async function submitFR(){
+  const email   = document.getElementById('fr_email').value.trim();
+  const message = document.getElementById('fr_message').value.trim();
+  if(!message){ alert('Please describe your feature idea.'); return; }
+  const btn = document.getElementById('frSubmitBtn');
+  btn.textContent='Submitting...'; btn.disabled=true;
+  try {
+    await emailjs.send(EJ_SVC, EJ_TPL, {
+      from_name: email || 'Anonymous',
+      from_email: email || 'no-reply@hybtretfs.com',
+      message_type: 'Feature Request',
+      message: message,
+      newsletter: 'N/A'
+    });
+    document.getElementById('frSuccess').style.display='block';
+    document.getElementById('frSubmitBtn').style.display='none';
+    setTimeout(()=>{ closeFR(); document.getElementById('frSuccess').style.display='none';
+      document.getElementById('frSubmitBtn').style.display='block';
+      btn.textContent='Submit Idea'; btn.disabled=false;
+      document.getElementById('fr_email').value='';
+      document.getElementById('fr_message').value='';
+    }, 2500);
+  } catch(e){
+    btn.textContent='Submit Idea'; btn.disabled=false;
+    alert('Something went wrong. Please try again.');
+  }
+}
 
 /* ── Email signup — MailerLite API ── */
 const ML_TOKEN='eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiYTI2OWZlNDFjYzZjYWNlOTg1NWVjOTRjNmUxMDI3OWRlZjQ2ODMwOGQ5YzRiMmU1OTZjNGFiNzgzZjEyOWZkZTM1MGUyYTRjNGNiMTkyOGYiLCJpYXQiOjE3NzkyNTMzMTkuNzYyMjMyLCJuYmYiOjE3NzkyNTMzMTkuNzYyMjM0LCJleHAiOjQ5MzQ5MjY5MTkuNzU3NjI1LCJzdWIiOiIyMzgyNDIwIiwic2NvcGVzIjpbXX0.jE7os2-YCJACgS-LYQkSvbUPexiq24ZQoy6QKJtlgZTfymub9gwlThXkJ7LZoZwRiUruw8WjexP2vpGPcb_fnfM3SyV1zwLvhEij1eUH7cFPd7BNwzGoVGhpWHFCZjT5GHPF1RhdQNLg5zWvnGz_1j0TE7bjwN_UnDZU71xu-tg8b4WIaP6Cng1rN7yZIDtbTtA2uKHU16zo0tUTTZYmEB14T_iK-1a0GjF1kHeGZV-nYCnv3NbGLEFqPH78P8WACrckuAJj2o4SCOO6wPZcgIJWQiXJXPK-kB_WjMgl5LLMjwiwKkqK41Gu_aLIX5YqwqKDvqsB1o0mtIolV-YeAkcawsDd8qjLyvHbQ4WSYdD0IB1pOz2aLjOadTHX8pHx-CHN60T3EGEF5NqwmkQXsO_2TVNKrlimT26G7Y9yLTeZteRKqRqeOkkdugUzEQSDTOmbyVOSZVOwDaeLvg3aqzLCz1_l_VMmS0pOJ6szZPUTVAj0Rs8qFmsznuSHEJPJOQ2COJY_ZkMyXGtlRRKh5oDU1XZ9zF1CIg5nNcaHmEZbVKX3ciBwDW73kZV08naLsvzJCE6s8wnGHsJnh1VX60BuvZOdzfNWSSv9kDCz0gRNuOwg-g5ZxP1CoIfC76QROczleEBW97k7fsldpPNHhPQK8NcpfM0e7G7kgNa0gJI';
