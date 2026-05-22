@@ -152,6 +152,86 @@
   .footer-date{font-size:12px;color:var(--txt2);font-family:var(--mono)}
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+
+  /* ── Mobile responsive ── */
+  @media(max-width:768px){
+    /* Nav */
+    nav{height:auto;flex-direction:column;align-items:flex-start;padding:.75rem 1rem;gap:8px}
+    .nav-brand{width:100%;display:flex;align-items:center;justify-content:space-between}
+    .nav-brand > div:first-child{display:flex;align-items:center;gap:8px}
+    .nav-brand img{height:38px !important}
+    .brand-slogan{display:none}
+    .nav-tabs{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;height:auto;gap:0}
+    .nav-tabs::-webkit-scrollbar{display:none}
+    .ntab{font-size:11px;padding:8px 12px;white-space:nowrap;height:auto;border-bottom:2px solid transparent}
+    .nav-meta{font-size:11px;align-self:flex-end;margin-top:-4px}
+
+    /* Layout */
+    .wrap{padding:.875rem .875rem 5rem}
+
+    /* Hero cards */
+    .heroes{grid-template-columns:1fr;gap:8px}
+    .hero{padding:.875rem 1rem}
+    .hero-sym{font-size:22px}
+    .hero-stats{gap:.875rem}
+    .sv{font-size:13px}
+
+    /* Filters */
+    .filters{padding:.75rem}
+    .filter-row{gap:6px}
+    .flabel{min-width:60px;font-size:9px}
+    input[type=search]{width:100%}
+    input[type=range]{max-width:100px}
+    .sval{min-width:36px;font-size:10px}
+    .sdivider{display:none}
+    .rcount{font-size:10px}
+
+    /* Top row */
+    .top-row{gap:4px}
+    .fb{font-size:11px;padding:4px 10px}
+    .trap-pill{font-size:10px;padding:3px 8px}
+
+    /* Table — horizontal scroll */
+    .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r)}
+    table{min-width:700px;font-size:11px}
+    thead th{font-size:9px;padding:6px 5px}
+    td{padding:6px 5px;font-size:11px}
+    .sym-btn{font-size:11px}
+
+    /* Signup bar */
+    .signup-bar{flex-direction:column;gap:.875rem;padding:1rem}
+    .signup-form{flex-direction:column}
+    .signup-input{width:100% !important}
+    .signup-btn{width:100%}
+
+    /* Feature Request button */
+    #frBtn{bottom:16px;right:16px;padding:10px 14px;font-size:12px}
+
+    /* Contact form */
+    #contactForm > div:first-child{grid-template-columns:1fr !important}
+
+    /* Modal */
+    .modal{margin:.5rem}
+    .modal-header{padding:1rem}
+    .modal-body{padding:1rem}
+    .modal-sym{font-size:24px}
+    .modal-grid{grid-template-columns:repeat(2,1fr)}
+
+    /* Watchlist */
+    #watchlistTable table{min-width:700px}
+
+    /* About */
+    .feature-grid{grid-template-columns:1fr !important}
+  }
+
+  @media(max-width:480px){
+    nav{padding:.625rem .875rem}
+    .nav-brand img{height:32px !important}
+    .ntab{font-size:10px;padding:7px 9px}
+    .hero-stats{flex-wrap:wrap;gap:.625rem}
+    .pill{font-size:11px;padding:3px 8px}
+    #frBtn{font-size:11px;padding:9px 12px}
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
@@ -165,7 +245,7 @@
       <a href="#" onclick="switchTab('dashboard');return false;" style="display:block;line-height:0"><img src="logo.png" alt="High-Yield, Best Total Return ETF's" style="height:52px;width:auto;display:block;cursor:pointer"></a>
       <span style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(211,224,80,0.15);color:var(--lime);border:1px solid rgba(211,224,80,0.4);border-radius:4px;padding:3px 8px;white-space:nowrap">BETA</span>
     </div>
-    <div class="brand-slogan" style="font-size:12px;font-style:italic;color:#b8cfe8;margin-left:10px;white-space:nowrap">Total return is what really matters.</div>
+    <div class="brand-slogan" style="font-size:12px;font-style:italic;color:#b8cfe8;margin-left:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">Total return is what really matters.</div>
   </div>
   <div class="nav-tabs">
     <button class="ntab active" data-tab="dashboard">Dashboard</button>
