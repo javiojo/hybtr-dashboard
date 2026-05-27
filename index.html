@@ -442,9 +442,9 @@
       <div class="about-card">
         <h2>What Is a Yield Trap?</h2>
         <p>A yield trap is a fund that looks attractive on paper because of its high distribution yield, but is actively destroying capital. The rule applied here:</p>
-        <div class="trap-rule">&#9888;&nbsp; Yield TTM &gt; 8% AND 1Y Total Return &lt; 0%</div>
-        <p style="margin-top:.875rem">When both conditions are true, the ETF is flagged in the leaderboard and counted in the yield trap indicator. These are funds to avoid, not buy.</p>
-        <p><strong style="color:var(--txt)">Why two different thresholds?</strong> The tracker uses a 6% minimum yield as the eligibility floor — that defines what counts as a genuinely high-yield fund. The yield trap warning is set at a higher 8% threshold because it targets a more specific danger: funds so aggressively distributing income that they are actively destroying their net asset value. A fund yielding 6.5% with a slightly negative total return may simply be going through a rough patch. A fund yielding 60% with a deeply negative return is almost certainly paying out its own capital as income — a classic yield trap. The 8% line is where that pattern becomes a meaningful warning signal.</p>
+        <div class="trap-rule">&#9888;&nbsp; 1Y Total Return &lt; 0%</div>
+        <p style="margin-top:.875rem">When 1Y Total Return is negative, the ETF is flagged in the leaderboard and counted in the yield trap indicator. No matter how high the yield, if you lost money overall, the distribution did not compensate — these are funds to avoid.</p>
+        <p><strong style="color:var(--txt)">Why is the rule based on total return only?</strong> Because yield alone does not tell you whether you made or lost money. Every ETF in this tracker already yields 6% or more — they are all high-yield by definition. What separates a good high-yield fund from a trap is whether it preserved or grew your capital. If the 1Y Total Return is negative, the fund paid out distributions while losing more value than it returned — that is a yield trap, regardless of how large the yield number looks.</p>
       </div>
       <div class="about-card">
         <h2>About This Tracker</h2>
@@ -534,7 +534,7 @@
 
   <footer>
     <strong>Disclaimer:</strong> This tracker is not financial advice. Information provided is for fun, entertainment, and research purposes only. Please consult a licensed financial planner for all your financial planning needs.
-    &nbsp;|&nbsp; <strong>Yield trap:</strong> Yield TTM &gt; 8% AND 1Y Total Return &lt; 0%.
+    &nbsp;|&nbsp; <strong>Yield trap:</strong> 1Y Total Return &lt; 0% — any high-yield ETF with a negative total return.
     &nbsp;|&nbsp; <strong>Eligibility:</strong> ETFs must have at least 6 months of price history and a Yield TTM of 6% or higher.
     <div class="footer-bottom">
       <span class="footer-date">Last updated: May 27, 2026</span>
@@ -553,7 +553,7 @@ D.sort((a,b)=>{
   return b.ret1y - a.ret1y;
 });
 
-const isYT=e=>e.yTTM>8&&e.ret1y!==null&&e.ret1y<0;
+const isYT=e=>e.ret1y!==null&&e.ret1y<0;
 const fmt=(v,d=1)=>v===null?'—':(v>=0?'+':'')+v.toFixed(d)+'%';
 const cc=v=>v===null?'na':v>0?'pos':v<0?'neg':'nt';
 const fmtM=v=>v===null?'—':v>=1000?(v/1000).toFixed(1)+'B':v.toFixed(0)+'M';
