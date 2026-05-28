@@ -896,7 +896,6 @@ function renderWatchlist(){
   empty.style.display = 'none';
   table.style.display = 'block';
   chartSection.style.display = 'block';
-  loadChart();
   items.sort((a,b)=>{
     if(a.ret1y===null&&b.ret1y===null)return 0;
     if(a.ret1y===null)return 1;
@@ -928,6 +927,9 @@ function renderWatchlist(){
   document.querySelectorAll('#watchlistBody .sym-btn').forEach((btn,i)=>{
     btn.onclick=()=>openModal(items[i]);
   });
+
+  // Load chart after rows are rendered — defer so Chart.js is ready
+  setTimeout(()=>{ try{ loadChart(); }catch(e){ console.warn('Chart error:',e); } }, 100);
 }
 
 document.getElementById('clearWatchlist').addEventListener('click',()=>{
