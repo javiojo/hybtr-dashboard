@@ -153,7 +153,12 @@
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 
-  /* ── Mobile responsive ── */
+  .chart-period{font-size:11px;font-family:var(--font);padding:4px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--txt2);cursor:pointer;transition:all .15s}
+  .chart-period:hover{color:var(--txt);border-color:var(--txt2)}
+  .chart-period.active{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:600}
+  .chart-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono)}
+  .chart-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
   @media(max-width:768px){
     /* Nav */
     nav{height:auto;flex-direction:column;align-items:flex-start;padding:.75rem 1rem;gap:8px}
@@ -233,6 +238,8 @@
     #frBtn{font-size:11px;padding:9px 12px}
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
@@ -360,6 +367,26 @@
       <div style="font-size:14px;color:var(--txt2)">No ETFs in your watchlist yet.</div>
       <div style="font-size:13px;color:var(--txt3);margin-top:6px">Click the &#9733; next to any ticker on the Dashboard to add it here.</div>
     </div>
+    <!-- Performance Chart -->
+    <div id="chartSection" style="display:none;margin-bottom:1.5rem">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1rem">
+          <div style="font-size:14px;font-weight:600;color:var(--txt)">📈 Total Return Comparison</div>
+          <div style="display:flex;gap:6px" id="chartPeriodBtns">
+            <button class="chart-period active" data-period="1mo">1M</button>
+            <button class="chart-period" data-period="3mo">3M</button>
+            <button class="chart-period" data-period="6mo">6M</button>
+            <button class="chart-period" data-period="ytd">YTD</button>
+            <button class="chart-period" data-period="1y">1Y</button>
+          </div>
+        </div>
+        <div id="chartLoading" style="text-align:center;padding:2rem;color:var(--txt2);font-size:13px">Loading price history...</div>
+        <canvas id="watchlistChart" style="display:none;width:100%;max-height:320px"></canvas>
+        <div id="chartLegend" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:1rem"></div>
+        <div id="chartError" style="display:none;text-align:center;padding:1rem;color:var(--txt3);font-size:12px"></div>
+      </div>
+    </div>
+
     <div class="tw" id="watchlistTable" style="display:none"><table>
       <thead><tr>
         <th style="width:4%"></th>
@@ -860,13 +887,17 @@ function renderWatchlist(){
   const items = D.filter(e => watchlist.has(e.symbol));
   const empty = document.getElementById('watchlistEmpty');
   const table = document.getElementById('watchlistTable');
+  const chartSection = document.getElementById('chartSection');
   if(items.length === 0){
     empty.style.display = 'block';
     table.style.display = 'none';
+    chartSection.style.display = 'none';
     return;
   }
   empty.style.display = 'none';
   table.style.display = 'block';
+  chartSection.style.display = 'block';
+  loadChart();
   items.sort((a,b)=>{
     if(a.ret1y===null&&b.ret1y===null)return 0;
     if(a.ret1y===null)return 1;
@@ -993,7 +1024,178 @@ async function submitFR(){
   }
 }
 
-/* ── Email signup — MailerLite API ── */
+
+/* ── Watchlist Performance Chart ── */
+const CHART_COLORS = [
+  '#d3e050','#4ade80','#60a5fa','#f472b6','#fb923c',
+  '#a78bfa','#34d399','#f87171','#38bdf8','#facc15',
+  '#e879f9','#4ade80','#fb7185','#818cf8','#2dd4bf'
+];
+
+let watchChart = null;
+let currentPeriod = '6mo';
+
+document.querySelectorAll('.chart-period').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.chart-period').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPeriod = btn.dataset.period;
+    loadChart();
+  });
+});
+
+async function fetchHistory(symbol, period) {
+  // Convert :CA to .TO for Yahoo Finance
+  let yfSym = symbol.replace(/:CA$/, '.TO').replace(/\.U:CA$/, '-U.TO');
+  
+  const periodMap = {
+    '1mo': {range:'1mo', interval:'1d'},
+    '3mo': {range:'3mo', interval:'1d'},
+    '6mo': {range:'6mo', interval:'1wk'},
+    'ytd': {range:'ytd', interval:'1wk'},
+    '1y':  {range:'1y',  interval:'1wk'}
+  };
+  const {range, interval} = periodMap[period] || periodMap['6mo'];
+  
+  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?range=${range}&interval=${interval}&includeAdjustedClose=true&events=div`;
+  
+  try {
+    const res = await fetch(url, {headers:{'Accept':'application/json'}});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    if (!result) throw new Error('No data');
+    
+    const timestamps = result.timestamp;
+    const adjClose = result.indicators?.adjclose?.[0]?.adjclose || result.indicators?.quote?.[0]?.close;
+    if (!timestamps || !adjClose) throw new Error('Missing price data');
+    
+    // Calculate total return % from first valid price
+    const prices = timestamps.map((t, i) => ({
+      date: new Date(t * 1000),
+      price: adjClose[i]
+    })).filter(p => p.price != null);
+    
+    if (prices.length < 2) throw new Error('Insufficient data');
+    
+    const base = prices[0].price;
+    return prices.map(p => ({
+      date: p.date,
+      ret: ((p.price - base) / base) * 100
+    }));
+  } catch(e) {
+    console.warn(`Chart fetch failed for ${symbol}:`, e.message);
+    return null;
+  }
+}
+
+async function loadChart() {
+  const items = D.filter(e => watchlist.has(e.symbol));
+  if (items.length === 0) return;
+  
+  const loading = document.getElementById('chartLoading');
+  const canvas = document.getElementById('watchlistChart');
+  const errorEl = document.getElementById('chartError');
+  const legend = document.getElementById('chartLegend');
+  
+  loading.style.display = 'block';
+  canvas.style.display = 'none';
+  errorEl.style.display = 'none';
+  legend.innerHTML = '';
+  
+  if (watchChart) { watchChart.destroy(); watchChart = null; }
+  
+  // Fetch all symbols in parallel
+  const results = await Promise.all(
+    items.map(e => fetchHistory(e.symbol, currentPeriod))
+  );
+  
+  const successful = items.filter((_, i) => results[i] !== null);
+  const datasets = successful.map((e, i) => {
+    const hist = results[items.indexOf(e)];
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    return {
+      label: e.symbol,
+      data: hist.map(p => ({x: p.date, y: parseFloat(p.ret.toFixed(2))})),
+      borderColor: color,
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      tension: 0.3
+    };
+  });
+  
+  if (datasets.length === 0) {
+    loading.style.display = 'none';
+    errorEl.textContent = 'Could not load price history. Yahoo Finance may be temporarily unavailable.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  loading.style.display = 'none';
+  canvas.style.display = 'block';
+  
+  // Build legend
+  legend.innerHTML = successful.map((e, i) => {
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    const lastRet = datasets[i].data[datasets[i].data.length - 1]?.y ?? 0;
+    return `<div class="chart-legend-item">
+      <div class="chart-legend-dot" style="background:${color}"></div>
+      <span style="color:var(--txt2)">${e.symbol}</span>
+      <span style="color:${lastRet >= 0 ? 'var(--pos)' : 'var(--neg)'}">${lastRet >= 0 ? '+' : ''}${lastRet.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+  
+  const ctx = canvas.getContext('2d');
+  watchChart = new Chart(ctx, {
+    type: 'line',
+    data: {datasets},
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: {mode: 'index', intersect: false},
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          backgroundColor: '#111e3d',
+          borderColor: 'rgba(139,155,192,0.25)',
+          borderWidth: 1,
+          titleColor: '#8fafd4',
+          bodyColor: '#e8edf8',
+          callbacks: {
+            title: items => {
+              const d = new Date(items[0].parsed.x);
+              return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+            },
+            label: item => {
+              const v = item.parsed.y;
+              return ` ${item.dataset.label}: ${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: {tooltipFormat: 'MMM d, yyyy'},
+          grid: {color: 'rgba(139,155,192,0.08)'},
+          ticks: {color: '#8fafd4', font: {size: 11}}
+        },
+        y: {
+          grid: {color: 'rgba(139,155,192,0.08)'},
+          ticks: {
+            color: '#8fafd4',
+            font: {size: 11},
+            callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%'
+          }
+        }
+      }
+    }
+  });
+}
+
+
 const ML_TOKEN='eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiI0IiwianRpIjoiYTI2OWZlNDFjYzZjYWNlOTg1NWVjOTRjNmUxMDI3OWRlZjQ2ODMwOGQ5YzRiMmU1OTZjNGFiNzgzZjEyOWZkZTM1MGUyYTRjNGNiMTkyOGYiLCJpYXQiOjE3NzkyNTMzMTkuNzYyMjMyLCJuYmYiOjE3NzkyNTMzMTkuNzYyMjM0LCJleHAiOjQ5MzQ5MjY5MTkuNzU3NjI1LCJzdWIiOiIyMzgyNDIwIiwic2NvcGVzIjpbXX0.jE7os2-YCJACgS-LYQkSvbUPexiq24ZQoy6QKJtlgZTfymub9gwlThXkJ7LZoZwRiUruw8WjexP2vpGPcb_fnfM3SyV1zwLvhEij1eUH7cFPd7BNwzGoVGhpWHFCZjT5GHPF1RhdQNLg5zWvnGz_1j0TE7bjwN_UnDZU71xu-tg8b4WIaP6Cng1rN7yZIDtbTtA2uKHU16zo0tUTTZYmEB14T_iK-1a0GjF1kHeGZV-nYCnv3NbGLEFqPH78P8WACrckuAJj2o4SCOO6wPZcgIJWQiXJXPK-kB_WjMgl5LLMjwiwKkqK41Gu_aLIX5YqwqKDvqsB1o0mtIolV-YeAkcawsDd8qjLyvHbQ4WSYdD0IB1pOz2aLjOadTHX8pHx-CHN60T3EGEF5NqwmkQXsO_2TVNKrlimT26G7Y9yLTeZteRKqRqeOkkdugUzEQSDTOmbyVOSZVOwDaeLvg3aqzLCz1_l_VMmS0pOJ6szZPUTVAj0Rs8qFmsznuSHEJPJOQ2COJY_ZkMyXGtlRRKh5oDU1XZ9zF1CIg5nNcaHmEZbVKX3ciBwDW73kZV08naLsvzJCE6s8wnGHsJnh1VX60BuvZOdzfNWSSv9kDCz0gRNuOwg-g5ZxP1CoIfC76QROczleEBW97k7fsldpPNHhPQK8NcpfM0e7G7kgNa0gJI';
 const ML_GROUP='187947608914789971';
 
