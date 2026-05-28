@@ -371,12 +371,19 @@
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1rem">
           <div style="font-size:14px;font-weight:600;color:var(--txt)">📈 Total Return Comparison</div>
-          <div style="display:flex;gap:6px" id="chartPeriodBtns">
-            <button class="chart-period active" data-period="1mo">1M</button>
-            <button class="chart-period" data-period="3mo">3M</button>
-            <button class="chart-period" data-period="6mo">6M</button>
-            <button class="chart-period" data-period="ytd">YTD</button>
-            <button class="chart-period" data-period="1y">1Y</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="display:flex;gap:6px" id="chartPeriodBtns">
+              <button class="chart-period active" data-period="1mo">1M</button>
+              <button class="chart-period" data-period="3mo">3M</button>
+              <button class="chart-period" data-period="6mo">6M</button>
+              <button class="chart-period" data-period="ytd">YTD</button>
+              <button class="chart-period" data-period="1y">1Y</button>
+            </div>
+            <div style="width:1px;height:20px;background:var(--border2)"></div>
+            <div style="display:flex;gap:4px" id="chartTypeBtns">
+              <button class="chart-type active" data-type="bar" title="Bar chart" style="font-size:15px;background:none;border:1px solid var(--lime);border-radius:var(--r);padding:3px 8px;cursor:pointer;color:var(--lime)">▐▌</button>
+              <button class="chart-type" data-type="line" title="Line chart" style="font-size:15px;background:none;border:1px solid var(--border2);border-radius:var(--r);padding:3px 8px;cursor:pointer;color:var(--txt2)">〜</button>
+            </div>
           </div>
         </div>
         <div id="chartLoading" style="text-align:center;padding:2rem;color:var(--txt2);font-size:13px">Loading price history...</div>
@@ -875,8 +882,23 @@ function updateWatchCount(){
 
 function toggleStar(evt, symbol){
   evt.stopPropagation();
-  if(watchlist.has(symbol)) watchlist.delete(symbol);
-  else watchlist.add(symbol);
+  if(watchlist.has(symbol)){
+    watchlist.delete(symbol);
+  } else {
+    if(watchlist.size >= 15){
+      const btn = document.querySelector('.star-btn[data-sym="'+symbol+'"]');
+      if(btn){ btn.style.color='var(--neg)'; setTimeout(()=>btn.style.color='',1200); }
+      let tip = document.getElementById('watchlimitTip');
+      if(!tip){ tip=document.createElement('div'); tip.id='watchlimitTip';
+        tip.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1b2e5b;color:var(--neg);border:1px solid var(--neg);border-radius:6px;padding:8px 16px;font-size:12px;z-index:600;white-space:nowrap';
+        document.body.appendChild(tip); }
+      tip.textContent='⚠ Watchlist limit reached (15 max)';
+      tip.style.display='block';
+      setTimeout(()=>{ if(tip) tip.style.display='none'; }, 2000);
+      return;
+    }
+    watchlist.add(symbol);
+  }
   saveWatchlist();
   render();
   renderWatchlist();
@@ -1035,12 +1057,28 @@ const CHART_COLORS = [
 
 let watchChart = null;
 let currentPeriod = '6mo';
+let currentChartType = 'bar';
 
 document.querySelectorAll('.chart-period').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.chart-period').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentPeriod = btn.dataset.period;
+    loadChart();
+  });
+});
+
+document.querySelectorAll('.chart-type').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.chart-type').forEach(b => {
+      b.classList.remove('active');
+      b.style.borderColor = 'var(--border2)';
+      b.style.color = 'var(--txt2)';
+    });
+    btn.classList.add('active');
+    btn.style.borderColor = 'var(--lime)';
+    btn.style.color = 'var(--lime)';
+    currentChartType = btn.dataset.type;
     loadChart();
   });
 });
@@ -1073,9 +1111,24 @@ function loadChart() {
 
   const datasets = items.map((e, i) => {
     const color = CHART_COLORS[i % CHART_COLORS.length];
+    const vals = allPeriods.map(p => (e[p.field] !== null && e[p.field] !== undefined) ? parseFloat(e[p.field].toFixed(2)) : null);
+    if(currentChartType === 'line') {
+      return {
+        label: e.symbol,
+        data: vals,
+        borderColor: color,
+        backgroundColor: color + '22',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: color,
+        tension: 0.3,
+        fill: false,
+      };
+    }
     return {
       label: e.symbol,
-      data: allPeriods.map(p => (e[p.field] !== null && e[p.field] !== undefined) ? parseFloat(e[p.field].toFixed(2)) : null),
+      data: vals,
       backgroundColor: color + 'aa',
       borderColor: color,
       borderWidth: 1.5,
@@ -1098,7 +1151,7 @@ function loadChart() {
 
   const ctx = canvas.getContext('2d');
   watchChart = new Chart(ctx, {
-    type: 'bar',
+    type: currentChartType === 'line' ? 'line' : 'bar',
     data: {labels, datasets},
     options: {
       responsive: true,
