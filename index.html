@@ -239,7 +239,6 @@
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
@@ -1029,7 +1028,7 @@ async function submitFR(){
 const CHART_COLORS = [
   '#d3e050','#4ade80','#60a5fa','#f472b6','#fb923c',
   '#a78bfa','#34d399','#f87171','#38bdf8','#facc15',
-  '#e879f9','#4ade80','#fb7185','#818cf8','#2dd4bf'
+  '#e879f9','#fb7185','#818cf8','#2dd4bf','#fbbf24'
 ];
 
 let watchChart = null;
@@ -1044,150 +1043,92 @@ document.querySelectorAll('.chart-period').forEach(btn => {
   });
 });
 
-async function fetchHistory(symbol, period) {
-  // Convert :CA to .TO for Yahoo Finance
-  let yfSym = symbol.replace(/:CA$/, '.TO').replace(/\.U:CA$/, '-U.TO');
-  
-  const periodMap = {
-    '1mo': {range:'1mo', interval:'1d'},
-    '3mo': {range:'3mo', interval:'1d'},
-    '6mo': {range:'6mo', interval:'1wk'},
-    'ytd': {range:'ytd', interval:'1wk'},
-    '1y':  {range:'1y',  interval:'1wk'}
-  };
-  const {range, interval} = periodMap[period] || periodMap['6mo'];
-  
-  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?range=${range}&interval=${interval}&includeAdjustedClose=true&events=div`;
-  
-  try {
-    const res = await fetch(url, {headers:{'Accept':'application/json'}});
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const result = data?.chart?.result?.[0];
-    if (!result) throw new Error('No data');
-    
-    const timestamps = result.timestamp;
-    const adjClose = result.indicators?.adjclose?.[0]?.adjclose || result.indicators?.quote?.[0]?.close;
-    if (!timestamps || !adjClose) throw new Error('Missing price data');
-    
-    // Calculate total return % from first valid price
-    const prices = timestamps.map((t, i) => ({
-      date: new Date(t * 1000),
-      price: adjClose[i]
-    })).filter(p => p.price != null);
-    
-    if (prices.length < 2) throw new Error('Insufficient data');
-    
-    const base = prices[0].price;
-    return prices.map(p => ({
-      date: p.date,
-      ret: ((p.price - base) / base) * 100
-    }));
-  } catch(e) {
-    console.warn(`Chart fetch failed for ${symbol}:`, e.message);
-    return null;
-  }
-}
-
-async function loadChart() {
+function loadChart() {
   const items = D.filter(e => watchlist.has(e.symbol));
   if (items.length === 0) return;
-  
+
   const loading = document.getElementById('chartLoading');
   const canvas = document.getElementById('watchlistChart');
   const errorEl = document.getElementById('chartError');
   const legend = document.getElementById('chartLegend');
-  
-  loading.style.display = 'block';
-  canvas.style.display = 'none';
+
+  loading.style.display = 'none';
   errorEl.style.display = 'none';
+  canvas.style.display = 'block';
   legend.innerHTML = '';
-  
+
   if (watchChart) { watchChart.destroy(); watchChart = null; }
-  
-  // Fetch all symbols in parallel
-  const results = await Promise.all(
-    items.map(e => fetchHistory(e.symbol, currentPeriod))
-  );
-  
-  const successful = items.filter((_, i) => results[i] !== null);
-  const datasets = successful.map((e, i) => {
-    const hist = results[items.indexOf(e)];
+
+  // Period labels on X axis
+  const allPeriods = [
+    {key:'1mo', label:'1M',  field:'m1'},
+    {key:'3mo', label:'3M',  field:'m3'},
+    {key:'6mo', label:'6M',  field:'m6'},
+    {key:'ytd', label:'YTD', field:'ytd'},
+    {key:'1y',  label:'1Y',  field:'ret1y'},
+  ];
+  const labels = allPeriods.map(p => p.label);
+
+  const datasets = items.map((e, i) => {
     const color = CHART_COLORS[i % CHART_COLORS.length];
     return {
       label: e.symbol,
-      data: hist.map(p => ({x: p.date, y: parseFloat(p.ret.toFixed(2))})),
+      data: allPeriods.map(p => (e[p.field] !== null && e[p.field] !== undefined) ? parseFloat(e[p.field].toFixed(2)) : null),
+      backgroundColor: color + 'aa',
       borderColor: color,
-      backgroundColor: 'transparent',
-      borderWidth: 2,
-      pointRadius: 0,
-      pointHoverRadius: 4,
-      tension: 0.3
+      borderWidth: 1.5,
+      borderRadius: 4,
     };
   });
-  
-  if (datasets.length === 0) {
-    loading.style.display = 'none';
-    errorEl.textContent = 'Could not load price history. Yahoo Finance may be temporarily unavailable.';
-    errorEl.style.display = 'block';
-    return;
-  }
-  
-  loading.style.display = 'none';
-  canvas.style.display = 'block';
-  
-  // Build legend
-  legend.innerHTML = successful.map((e, i) => {
+
+  // Legend with value for selected period
+  const selField = allPeriods.find(p => p.key === currentPeriod)?.field || 'ret1y';
+  legend.innerHTML = items.map((e, i) => {
     const color = CHART_COLORS[i % CHART_COLORS.length];
-    const lastRet = datasets[i].data[datasets[i].data.length - 1]?.y ?? 0;
-    return `<div class="chart-legend-item">
-      <div class="chart-legend-dot" style="background:${color}"></div>
-      <span style="color:var(--txt2)">${e.symbol}</span>
-      <span style="color:${lastRet >= 0 ? 'var(--pos)' : 'var(--neg)'}">${lastRet >= 0 ? '+' : ''}${lastRet.toFixed(1)}%</span>
-    </div>`;
+    const val = e[selField];
+    return '<div class="chart-legend-item">'
+      +'<div class="chart-legend-dot" style="background:'+color+'"></div>'
+      +'<span style="color:var(--txt2)">'+e.symbol+'</span>'
+      +'<span style="color:'+(val===null?'var(--txt3)':val>=0?'var(--pos)':'var(--neg)')+'">'+
+        (val===null?'—':(val>=0?'+':'')+val.toFixed(1)+'%')+'</span>'
+      +'</div>';
   }).join('');
-  
+
   const ctx = canvas.getContext('2d');
   watchChart = new Chart(ctx, {
-    type: 'line',
-    data: {datasets},
+    type: 'bar',
+    data: {labels, datasets},
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      interaction: {mode: 'index', intersect: false},
+      interaction: {mode:'index', intersect:false},
       plugins: {
-        legend: {display: false},
+        legend: {display:false},
         tooltip: {
-          backgroundColor: '#111e3d',
-          borderColor: 'rgba(139,155,192,0.25)',
-          borderWidth: 1,
-          titleColor: '#8fafd4',
-          bodyColor: '#e8edf8',
+          backgroundColor:'#111e3d',
+          borderColor:'rgba(139,155,192,0.25)',
+          borderWidth:1,
+          titleColor:'#8fafd4',
+          bodyColor:'#e8edf8',
           callbacks: {
-            title: items => {
-              const d = new Date(items[0].parsed.x);
-              return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-            },
             label: item => {
               const v = item.parsed.y;
-              return ` ${item.dataset.label}: ${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+              if (v===null||isNaN(v)) return ' '+item.dataset.label+': —';
+              return ' '+item.dataset.label+': '+(v>=0?'+':'')+v.toFixed(2)+'%';
             }
           }
         }
       },
       scales: {
         x: {
-          type: 'time',
-          time: {tooltipFormat: 'MMM d, yyyy'},
-          grid: {color: 'rgba(139,155,192,0.08)'},
-          ticks: {color: '#8fafd4', font: {size: 11}}
+          grid:{color:'rgba(139,155,192,0.08)'},
+          ticks:{color:'#8fafd4',font:{size:11}}
         },
         y: {
-          grid: {color: 'rgba(139,155,192,0.08)'},
-          ticks: {
-            color: '#8fafd4',
-            font: {size: 11},
-            callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%'
+          grid:{color:'rgba(139,155,192,0.08)'},
+          ticks:{
+            color:'#8fafd4',font:{size:11},
+            callback: v => (v>=0?'+':'')+v.toFixed(0)+'%'
           }
         }
       }
