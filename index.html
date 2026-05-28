@@ -97,7 +97,7 @@
   .star-btn.starred{color:var(--lime)}
   .na{color:var(--txt3);font-size:12px}
   .empty{padding:2.5rem;text-align:center;color:var(--txt3);font-size:13px}
-  .col-star{width:2%}.col-r{width:9%}.col-n{width:20%}.col-p{width:6%}.col-c{width:7%}.col-1y{width:10%}.col-ytd{width:7%}.col-1m{width:6%}.col-6m{width:6%}.col-yt{width:8%}.col-yf{width:8%}.col-fr{width:7%}
+  .col-star{width:2%}.col-r{width:9%}.col-n{width:20%}.col-p{width:6%}.col-1y{width:10%}.col-ytd{width:7%}.col-1m{width:6%}.col-6m{width:6%}.col-yt{width:8%}.col-fr{width:7%}
 
   /* ── MODAL ── */
   .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem}
@@ -336,13 +336,11 @@
         <th class="col-r" data-col="symbol">#&nbsp; Symbol</th>
         <th class="col-n name-cell" data-col="name">Fund name</th>
         <th class="col-p r" data-col="price">Price</th>
-        <th class="col-c r" data-col="chg"><span style="display:block">Day</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Change %</span></th>
         <th class="col-1y r sort-desc" data-col="ret1y"><span style="display:block">1Y Total</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Return</span></th>
         <th class="col-ytd r" data-col="ytd"><span style="display:block">YTD</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Total Return</span></th>
         <th class="col-1m r" data-col="m1"><span style="display:block">1M</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Total Return</span></th>
         <th class="col-6m r" data-col="m6"><span style="display:block">6M</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Total Return</span></th>
         <th class="col-yt r" data-col="yTTM"><span style="display:block">Yield</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">TTM</span></th>
-        <th class="col-yf r" data-col="yFWD"><span style="display:block">Yield</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">FWD</span></th>
         <th class="col-fr" data-col="freq">Frequency</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
@@ -368,13 +366,13 @@
         <th class="col-r" data-col="symbol">#&nbsp; Symbol</th>
         <th class="col-n name-cell" data-col="name">Fund name</th>
         <th class="col-p r" data-col="price" >Price</th>
-        <th class="col-c r" data-col="chg" ><span style="display:block">Day</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Change %</span></th>
+        
         <th class="col-1y r" data-col="ret1y" ><span style="display:block">1Y Total</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Return</span></th>
         <th class="col-ytd r" data-col="ytd" ><span style="display:block">YTD</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Total Return</span></th>
         <th class="col-1m r" data-col="m1" ><span style="display:block">1M</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Total Return</span></th>
         <th class="col-6m r" data-col="m6" ><span style="display:block">6M</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">Total Return</span></th>
         <th class="col-yt r" data-col="yTTM" ><span style="display:block">Yield</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">TTM</span></th>
-        <th class="col-yf r" data-col="yFWD" ><span style="display:block">Yield</span><span style="display:block;font-size:10px;opacity:.75;letter-spacing:.02em">FWD</span></th>
+        
         <th class="col-fr" data-col="freq" >Frequency</th>
       </tr></thead>
       <tbody id="watchlistBody"></tbody>
@@ -801,7 +799,7 @@ function render(){
   document.getElementById('resultCount').textContent=filtered.length+' / '+D.length+' ETFs';
   const rows=filtered.slice(0,topN);
   if(rows.length===0){
-    document.getElementById('tbody').innerHTML='<tr><td colspan="12" class="empty">No ETFs match the current filters.</td></tr>';
+    document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="empty">No ETFs match the current filters.</td></tr>';
     return;
   }
 
@@ -817,13 +815,11 @@ function render(){
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
-      +'<td class="r"><span class="'+cc(e.chg)+'">'+fmt(e.chg)+'</span></td>'
       +'<td class="r">'+ret1yCell+'</td>'
       +'<td class="r"><span class="'+cc(e.ytd)+'">'+fmt(e.ytd)+'</span></td>'
       +'<td class="r"><span class="'+cc(e.m1)+'">'+fmt(e.m1)+'</span></td>'
       +'<td class="r"><span class="'+cc(e.m6)+'">'+fmt(e.m6)+'</span></td>'
       +'<td class="r">'+e.yTTM.toFixed(2)+'%</td>'
-      +'<td class="r">'+e.yFWD.toFixed(2)+'%</td>'
       +'<td><span class="fp">'+e.freq+'</span></td>'
       +'</tr>';
   }).join('');
@@ -889,13 +885,11 @@ function renderWatchlist(){
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="fnm name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
-      +'<td class="r"><span class="'+cc(e.chg)+'">'+fmt(e.chg)+'</span></td>'
       +'<td class="r">'+ret1yCell+'</td>'
       +'<td class="r"><span class="'+cc(e.ytd)+'">'+fmt(e.ytd)+'</span></td>'
       +'<td class="r"><span class="'+cc(e.m1)+'">'+fmt(e.m1)+'</span></td>'
       +'<td class="r"><span class="'+cc(e.m6)+'">'+fmt(e.m6)+'</span></td>'
       +'<td class="r">'+e.yTTM.toFixed(2)+'%</td>'
-      +'<td class="r">'+e.yFWD.toFixed(2)+'%</td>'
       +'<td><span class="fp">'+e.freq+'</span></td>'
       +'</tr>';
   }).join('');
