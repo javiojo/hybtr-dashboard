@@ -482,7 +482,7 @@
         <ul>
           <li>Tracking the best high-yield dividend ETFs from the <strong style="color:var(--txt)">United States and Canada</strong>, ranked by 1-year total return</li>
           <li>Covers US-listed ETFs (NYSE, NASDAQ, CBOE) and Canadian-listed ETFs (TSX) — including popular Canadian high-income funds such as Harvest, CI, and Purpose strategies</li>
-          <li>762 ETFs tracked across all asset classes and dividend frequencies (out of 909 screened)</li>
+          <li>Around 760+ ETFs tracked across all asset classes and dividend frequencies</li>
           <li>Eligibility: at least 6 months of price history AND Yield TTM of 6% or higher</li>
           <li>ETFs with less than 12 months of history are included but show "—" for 1Y Total Return</li>
           <li>Updated daily with fresh market data</li>
@@ -829,7 +829,10 @@ function render(){
     ts.innerHTML='&#10003; No yield traps';
   }
 
-  document.getElementById('resultCount').textContent=filtered.length+' / '+D.length+' ETFs';
+  const rc = document.getElementById('resultCount');
+  rc.textContent = filtered.length === D.length
+    ? D.length + ' ETFs'
+    : filtered.length + ' / ' + D.length + ' ETFs';
   const rows=filtered.slice(0,topN);
   if(rows.length===0){
     document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="empty">No ETFs match the current filters.</td></tr>';
