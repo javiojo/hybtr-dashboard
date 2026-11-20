@@ -1,0 +1,24 @@
+# Seeking Alpha Excel exports must never be committed (vendor data).
+incoming/*.xlsx
+incoming/*.xls
+incoming/*.xlsm
+incoming/*.XLSX
+
+# Temporary download dir used by the ingest workflow.
+.sa-download/
+
+# Python
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+.DS_Store
