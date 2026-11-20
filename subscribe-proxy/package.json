@@ -1,0 +1,8 @@
+{
+  "name": "hybtr-subscribe-proxy",
+  "private": true,
+  "description": "Tiny MailerLite subscribe proxy for hybtretfs.com. No dependencies.",
+  "engines": {
+    "node": ">=18"
+  }
+}
