@@ -64,6 +64,7 @@
   .pill:hover{border-color:var(--txt2);color:var(--txt)}
   .pill.on{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:500}
   .pill.trap-on{background:var(--trap-bg);border-color:var(--trap-txt);color:var(--trap-txt)}
+  .pill.lev-on{background:rgba(250,204,21,0.12);border-color:#facc15;color:#facc15}
   .sval{font-size:11px;color:var(--lime);font-family:var(--mono);font-weight:500;min-width:52px}
   .sdivider{width:1px;background:var(--border2);align-self:stretch;margin:0 4px}
   .rcount{font-size:11px;color:var(--txt3);font-family:var(--mono);margin-left:auto}
@@ -313,6 +314,7 @@
         <button class="pill" data-ret="pos">Positive only</button>
         <button class="pill" data-ret="neg">Negative only</button>
         <button class="pill" id="trapBtn">&#9888; Yield traps only</button>
+        <button class="pill" id="levBtn">&#9888; Leveraged only</button>
       </div>
       <div class="filter-row">
         <span class="flabel">1Y Return &#8805;</span>
@@ -601,6 +603,7 @@ D.sort((a,b)=>{
 });
 
 const isYT=e=>e.ret1y!==null&&e.ret1y<0;
+const isLev=e=>e.fund_type==='Leveraged';
 const fmt=(v,d=1)=>v===null?'—':(v>=0?'+':'')+v.toFixed(d)+'%';
 const cc=v=>v===null?'na':v>0?'pos':v<0?'neg':'nt';
 const fmtM=v=>v===null?'—':v>=1000?(v/1000).toFixed(1)+'B':v.toFixed(0)+'M';
@@ -663,7 +666,6 @@ function openModal(e){
   chgEl.className='modal-chg '+cc(e.chg);
 
   let html='';
-  const isLev=e=>e.fund_type==='Leveraged';
   if(isLev(e)) html+='<div class="modal-trap-badge" style="background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.4);color:#fb923c">&#9888; Leveraged ETF — Use caution: designed for short-term trading, not long-term income investing</div>';
   if(isYT(e)) html+='<div class="modal-trap-badge">&#9888; Yield Trap — High yield with negative 1Y return</div>';
 
@@ -732,7 +734,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 /* ── State ── */
 let sortCol='ret1y',sortDir=-1,topN=25;
-let filterFreq='All',filterRet='all',filterTrap=false,filterYield=0,filterSearch='',filterReturn1y=minReturn,filterReturn6m=min6m,filterCountry='All';
+let filterFreq='All',filterRet='all',filterTrap=false,filterLev=false,filterYield=0,filterSearch='',filterReturn1y=minReturn,filterReturn6m=min6m,filterCountry='All';
 
 document.getElementById('searchBox').addEventListener('input',e=>{filterSearch=e.target.value.toLowerCase();render();
 
@@ -759,9 +761,10 @@ document.querySelectorAll('[data-country]').forEach(b=>b.addEventListener('click
 }));
 
 document.querySelectorAll('[data-ret]').forEach(b=>b.addEventListener('click',()=>{
-  filterRet=b.dataset.ret;filterTrap=false;
+  filterRet=b.dataset.ret;filterTrap=false;filterLev=false;
   document.querySelectorAll('[data-ret]').forEach(x=>x.classList.remove('on'));
   document.getElementById('trapBtn').classList.remove('trap-on');
+  document.getElementById('levBtn').classList.remove('lev-on');
   b.classList.add('on');render();
 }));
 
@@ -769,6 +772,12 @@ document.getElementById('trapBtn').addEventListener('click',()=>{
   filterTrap=!filterTrap;
   document.getElementById('trapBtn').classList.toggle('trap-on',filterTrap);
   if(filterTrap){filterRet='all';document.querySelectorAll('[data-ret]').forEach(x=>x.classList.remove('on'));}
+  render();
+});
+
+document.getElementById('levBtn').addEventListener('click',()=>{
+  filterLev=!filterLev;
+  document.getElementById('levBtn').classList.toggle('lev-on',filterLev);
   render();
 });
 
@@ -812,6 +821,7 @@ function applyFilters(){
     if(filterRet==='pos'&&(e.ret1y===null||e.ret1y<=0))return false;
     if(filterRet==='neg'&&(e.ret1y===null||e.ret1y>=0))return false;
     if(filterTrap&&!isYT(e))return false;
+    if(filterLev&&!isLev(e))return false;
     if(e.yTTM<filterYield)return false;
     if(e.ret1y!==null&&e.ret1y<filterReturn1y&&filterReturn1y>minReturn)return false;
     if(e.m6<filterReturn6m)return false;
