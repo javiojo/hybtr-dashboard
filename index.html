@@ -52,6 +52,7 @@
   .sl{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--txt3)}
   .sv{font-size:15px;font-weight:600;font-family:var(--mono)}
   .yp{font-size:10px;background:var(--trap-bg);color:var(--trap-txt);border-radius:4px;padding:1px 5px;font-weight:600;margin-left:4px;white-space:nowrap;flex-shrink:0}
+  .lev{font-size:10px;background:rgba(250,204,21,0.12);color:#facc15;border-radius:4px;padding:1px 5px;font-weight:600;margin-left:4px;white-space:nowrap;flex-shrink:0}
   .pos{color:var(--pos)}.neg{color:var(--neg)}.nt{color:var(--txt2)}
   .filters{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:.875rem 1.25rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:10px}
   .filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -338,7 +339,7 @@
     </div>
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--txt2);margin-bottom:8px;padding:0 2px">
       <span style="font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3)">Legend:</span>
-      <span style="display:flex;align-items:center;gap:5px"><span style="font-size:13px">⚠️</span> Leveraged ETF — use caution, designed for short-term trading</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:rgba(250,204,21,0.12);color:#facc15;border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Leveraged ETF — use caution, designed for short-term trading</span>
       <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:var(--trap-bg);color:var(--trap-txt);border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Yield Trap — positive yield but negative 1Y total return</span>
     </div>
     <div class="tw"><table>
@@ -483,9 +484,9 @@
         <p><strong style="color:var(--txt)">Why is the rule based on total return only?</strong> Because yield alone does not tell you whether you made or lost money. Every ETF in this tracker yields 3% or more — they are all dividend-paying by definition. What separates a good high-yield fund from a trap is whether it preserved or grew your capital. If the 1Y Total Return is negative, the fund paid out distributions while losing more value than it returned — that is a yield trap, regardless of how large the yield number looks.</p>
       </div>
       <div class="about-card">
-        <h2>What Is a Leveraged ETF? ⚠️</h2>
+        <h2>What Is a Leveraged ETF? &#9888;</h2>
         <p>Leveraged ETFs use derivatives and borrowed money to amplify the daily returns of an index — typically 2× or 3×. While they can generate outsized gains in a trending market, they also suffer from <strong style="color:var(--txt)">volatility decay</strong>: in choppy or sideways markets they lose value rapidly, even if the underlying index ends flat.</p>
-        <p style="margin-top:.875rem">These funds are designed for short-term trading, not long-term holding. High headline yields on leveraged ETFs often reflect return-of-capital distributions rather than income, and their 1Y total return numbers can be extremely volatile. They appear in this tracker because they clear the screener criteria, but the <strong style="color:var(--txt)">⚠️ icon</strong> marks them as high-risk instruments not suitable for most income investors.</p>
+        <p style="margin-top:.875rem">These funds are designed for short-term trading, not long-term holding. High headline yields on leveraged ETFs often reflect return-of-capital distributions rather than income, and their 1Y total return numbers can be extremely volatile. They appear in this tracker because they clear the screener criteria, but the <strong style="color:var(--txt)">&#9888; caution badge</strong> marks them as high-risk instruments not suitable for most income investors.</p>
       </div>
       <div class="about-card">
         <h2>About This Tracker</h2>
@@ -663,7 +664,7 @@ function openModal(e){
 
   let html='';
   const isLev=e=>e.fund_type==='Leveraged';
-  if(isLev(e)) html+='<div class="modal-trap-badge" style="background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.4);color:#fb923c">⚠️ Leveraged ETF — Use caution: designed for short-term trading, not long-term income investing</div>';
+  if(isLev(e)) html+='<div class="modal-trap-badge" style="background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.4);color:#fb923c">&#9888; Leveraged ETF — Use caution: designed for short-term trading, not long-term income investing</div>';
   if(isYT(e)) html+='<div class="modal-trap-badge">&#9888; Yield Trap — High yield with negative 1Y return</div>';
 
   html+='<div class="modal-section"><div class="modal-section-title">Performance</div><div class="modal-grid">';
@@ -865,7 +866,7 @@ function render(){
       +'<td style="padding:7px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
       +'<button class="sym-btn" data-sym="'+e.symbol+'">'+e.symbol+'</button>'
-      +(e.fund_type==='Leveraged'?'<span title="Leveraged ETF — Use caution: designed for short-term trading" style="font-size:13px;line-height:1;cursor:default">⚠️</span>':'')
+      +(e.fund_type==='Leveraged'?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
@@ -954,7 +955,7 @@ function renderWatchlist(){
       +'<td style="padding:8px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
       +'<button class="sym-btn" onclick="openModal(D.find(x=>x.symbol===\''+e.symbol+'\'))">'+e.symbol+'</button>'
-      +(e.fund_type==='Leveraged'?'<span title="Leveraged ETF — Use caution: designed for short-term trading" style="font-size:13px;line-height:1;cursor:default">⚠️</span>':'')
+      +(e.fund_type==='Leveraged'?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="fnm name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
