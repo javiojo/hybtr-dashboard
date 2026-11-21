@@ -128,19 +128,12 @@ module.exports = async function handler(req, res) {
     if (name) body.name = name;
   }
 
-  const defaultGroup = process.env.MAILERLITE_GROUP || "";
-  const groups = [];
-  if (Array.isArray(payload.groups)) {
-    for (const g of payload.groups) {
-      if (typeof g === "string" && /^\d+$/.test(g) && groups.length < 5) {
-        groups.push(g);
-      }
-    }
+  // Always add only to the HYBTR Weekly Newsletter group. Ignore any
+  // client-supplied group ids so a caller cannot enroll people elsewhere.
+  const allowedGroup = process.env.MAILERLITE_GROUP || "187947608914789971";
+  if (/^\d+$/.test(allowedGroup)) {
+    body.groups = [allowedGroup];
   }
-  if (groups.length === 0 && /^\d+$/.test(defaultGroup)) {
-    groups.push(defaultGroup);
-  }
-  if (groups.length) body.groups = groups;
 
   if (payload.fields && typeof payload.fields === "object" && !Array.isArray(payload.fields)) {
     const fields = {};

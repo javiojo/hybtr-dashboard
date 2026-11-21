@@ -54,5 +54,5 @@ This is the simplest option if you do not want another service to operate.
 
 ## What was left in the page on purpose
 
-- `ML_GROUP` (`187947608914789971`) is a group id, not a credential. The proxy forwards it so new subscribers still land in the same group.
+- `ML_GROUP` (`187947608914789971`) is a group id, not a credential. The proxy always adds subscribers to this group (or `MAILERLITE_GROUP` if set) and ignores any groups sent by the page.
 - EmailJS public keys stay in the page; they are designed to be public. Please lock the EmailJS template/service to `hybtretfs.com` in the EmailJS dashboard if that is not already done.

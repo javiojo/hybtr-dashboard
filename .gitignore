@@ -22,3 +22,6 @@ venv/
 !.env.example
 
 .DS_Store
+
+# Local Vercel project link (do not commit)
+.vercel/
