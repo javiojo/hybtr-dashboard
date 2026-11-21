@@ -1,0 +1,209 @@
+name: Ingest Seeking Alpha export
+
+on:
+  schedule:
+    # 8:00 PM America/New_York on weekdays. GitHub cron is UTC and does not
+    # follow DST, so both 00:00 and 01:00 UTC Tuesday–Saturday are listed; a
+    # job step then exits unless the local hour is 20 (8 PM).
+    #   EST (UTC-5): Monday–Friday 8 PM = Tuesday–Saturday 01:00 UTC
+    #   EDT (UTC-4): Monday–Friday 8 PM = Tuesday–Saturday 00:00 UTC
+    - cron: '0 0 * * 2-6'
+    - cron: '0 1 * * 2-6'
+  workflow_dispatch:
+    inputs:
+      file_path:
+        description: Optional repo path to a specific .xlsx (e.g. incoming/export.xlsx)
+        required: false
+        type: string
+      force:
+        description: Ingest even if the file is not newer than the last run
+        required: false
+        type: boolean
+        default: false
+
+# Same group as enrich-daily.yml so the two jobs cannot push at the same time.
+permissions:
+  contents: write
+
+concurrency:
+  group: enrich-data
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Skip scheduled runs that are not 8 PM America/New_York
+        if: github.event_name == 'schedule'
+        run: |
+          export TZ=America/New_York
+          hour=$(date +%H)
+          echo "Local time is $(date) (hour=$hour)"
+          if [ "$hour" != "20" ]; then
+            echo "This scheduled slot is the off-season UTC offset; exiting cleanly."
+            echo "skip=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Locate Seeking Alpha export
+        if: env.skip != 'true'
+        env:
+          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
+          INPUT_PATH: ${{ github.event.inputs.file_path }}
+        run: |
+          set -euo pipefail
+          mkdir -p .sa-download incoming
+          chosen=""
+          chosen_name=""
+          chosen_mtime=""
+
+          if [ -n "${INPUT_PATH:-}" ]; then
+            if [ ! -f "$INPUT_PATH" ]; then
+              echo "Requested file_path does not exist: $INPUT_PATH"
+              exit 1
+            fi
+            chosen="$INPUT_PATH"
+            chosen_name="$(basename "$INPUT_PATH")"
+            chosen_mtime="$(date -u -d "$(stat -c %y "$INPUT_PATH")" +%Y-%m-%dT%H:%M:%SZ)"
+            echo "Using workflow_dispatch file_path=$INPUT_PATH"
+          else
+            incoming=$(ls -1t incoming/*.xlsx incoming/*.XLSX 2>/dev/null | head -n 1 || true)
+            if [ -n "$incoming" ]; then
+              chosen="$incoming"
+              chosen_name="$(basename "$incoming")"
+              chosen_mtime="$(date -u -d "$(stat -c %y "$incoming")" +%Y-%m-%dT%H:%M:%SZ)"
+              echo "Using newest incoming/ file: $incoming"
+            fi
+
+            if [ -n "${GDRIVE_SA_KEY:-}" ]; then
+              pip install 'google-auth>=2.0' 'google-api-python-client>=2.0'
+              set +e
+              python scripts/fetch_drive_xlsx.py --output-dir .sa-download | tee .sa-download/fetch.log
+              fetch_rc=${PIPESTATUS[0]}
+              set -e
+              if [ "$fetch_rc" -ne 0 ]; then
+                echo "Drive download failed"
+                exit "$fetch_rc"
+              fi
+              drive_path=$(awk -F= '/^PATH=/{print $2}' .sa-download/fetch.log | tail -n 1)
+              drive_name=$(awk -F= '/^NAME=/{print $2}' .sa-download/fetch.log | tail -n 1)
+              drive_mtime=$(awk -F= '/^MODIFIED=/{print $2}' .sa-download/fetch.log | tail -n 1)
+              if [ -n "${drive_path:-}" ] && [ -f "$drive_path" ]; then
+                # Prefer the Drive file when it is newer than incoming/, or when
+                # incoming/ has nothing.
+                if [ -z "$chosen" ]; then
+                  chosen="$drive_path"
+                  chosen_name="$drive_name"
+                  chosen_mtime="$drive_mtime"
+                else
+                  # Compare timestamps (fallback: keep incoming if parse fails).
+                  if [ -n "$drive_mtime" ] && [ "$drive_mtime" \> "${chosen_mtime:-}" ]; then
+                    chosen="$drive_path"
+                    chosen_name="$drive_name"
+                    chosen_mtime="$drive_mtime"
+                  fi
+                fi
+                echo "Newest Drive export: $drive_name ($drive_mtime)"
+              fi
+            else
+              echo "GDRIVE_SA_KEY is not set; skipping Drive download."
+            fi
+          fi
+
+          if [ -z "$chosen" ] || [ ! -f "$chosen" ]; then
+            echo "No Seeking Alpha .xlsx found in incoming/ or Drive. Nothing to ingest."
+            echo "skip=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "CHOSEN_PATH=$chosen" >> "$GITHUB_ENV"
+          echo "CHOSEN_NAME=$chosen_name" >> "$GITHUB_ENV"
+          echo "CHOSEN_MTIME=$chosen_mtime" >> "$GITHUB_ENV"
+          echo "Selected $chosen_name (modified $chosen_mtime)"
+
+      - name: Skip if this export was already ingested
+        if: env.skip != 'true'
+        env:
+          FORCE: ${{ github.event.inputs.force || 'false' }}
+        run: |
+          set -euo pipefail
+          if [ "$FORCE" = "true" ]; then
+            echo "Force requested; ingesting $CHOSEN_NAME regardless of state."
+            exit 0
+          fi
+          state=".ingest_state.json"
+          if [ ! -f "$state" ]; then
+            echo "No .ingest_state.json yet; will ingest."
+            exit 0
+          fi
+          python - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          state_path = Path(".ingest_state.json")
+          state = json.loads(state_path.read_text())
+          name = os.environ["CHOSEN_NAME"]
+          mtime = os.environ.get("CHOSEN_MTIME") or ""
+          prev_name = state.get("file_name") or ""
+          prev_mtime = state.get("modified_time") or ""
+          print(f"Last ingested: {prev_name} ({prev_mtime})")
+          print(f"Candidate:     {name} ({mtime})")
+          if name == prev_name and mtime and prev_mtime and mtime <= prev_mtime:
+              print("Export is not newer than the last ingest; skipping.")
+              Path(os.environ["GITHUB_ENV"]).open("a").write("skip=true\n")
+          elif name == prev_name and not mtime:
+              print("Same file name and no modified time; skipping to be safe.")
+              Path(os.environ["GITHUB_ENV"]).open("a").write("skip=true\n")
+          else:
+              print("New or newer export; will ingest.")
+          PY
+
+      - name: Ingest Seeking Alpha export
+        if: env.skip != 'true'
+        run: python scripts/ingest_sa.py --input "$CHOSEN_PATH"
+
+      - name: Enrich with Yahoo prices and technicals
+        if: env.skip != 'true'
+        run: python scripts/enrich.py
+
+      - name: Record ingest state
+        if: env.skip != 'true'
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          from pathlib import Path
+          Path(".ingest_state.json").write_text(json.dumps({
+              "file_name": os.environ["CHOSEN_NAME"],
+              "modified_time": os.environ.get("CHOSEN_MTIME") or None,
+              "ingested_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }, indent=2) + "\n")
+          PY
+
+      - name: Commit and push
+        if: env.skip != 'true'
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Never stage Excel exports or the download directory.
+          git add data.js index.html .ingest_state.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(data): Seeking Alpha ingest $(date -u +%Y-%m-%d)"
+          git fetch origin main
+          git pull --rebase origin main
+          git push origin HEAD:main

@@ -3,9 +3,21 @@
 Daily enrichment for hybtretfs.com.
 
 Reads data.js, fetches dividend-adjusted closes from yfinance for every symbol,
-recomputes total returns (price, chg, m3, m6, ytd, ret1y), and surgically rewrites
-those fields in place. All other fields (yTTM, yFWD, aum, sma*, rsi, etc.) are
-preserved as-is. Updates "Data:" / "Last updated:" date strings in index.html.
+recomputes total returns and technicals, and surgically rewrites those fields
+in place.
+
+Updated every run (when a value can be computed):
+  price, chg, w1, m1, m3, m6, ytd, ret1y,
+  high52, low52, sma50, sma100, sma200, vs50, vs200, rsi (Wilder 14)
+
+Never overwritten with NaN — the previous value is left in place.
+Seeking Alpha-only fields are left untouched:
+  aum, issuer, ac, fund_type, exp, holdings, freq, payout, exdiv, yTTM, yFWD
+
+yTTM / yFWD could later be recomputed from Yahoo dividend history on days
+with no fresh Excel; that is intentionally not done in this change.
+
+Also updates "Data:" / "Last updated:" date strings in index.html.
 """
 from __future__ import annotations
 
@@ -29,6 +41,26 @@ FAIL_THRESHOLD = 0.20  # abort if >20% of symbols fail
 # Optional override for local testing: ENRICH_LIMIT=20 only processes 20 symbols.
 LIMIT = int(os.environ.get("ENRICH_LIMIT", "0")) or None
 DRY_RUN = os.environ.get("ENRICH_DRY_RUN") == "1"
+
+# Fields Path A may rewrite when a fresh value is available.
+RETURN_FIELDS = ("price", "chg", "w1", "m1", "m6", "ytd", "ret1y")
+TECHNICAL_FIELDS = (
+    "high52",
+    "low52",
+    "sma50",
+    "sma100",
+    "sma200",
+    "vs50",
+    "vs200",
+    "rsi",
+)
+UPDATE_FIELDS = RETURN_FIELDS + TECHNICAL_FIELDS
+
+
+def format_display_date(day: date | None = None) -> str:
+    """Portable 'November 19, 2026' (avoids the Linux-only %-d directive)."""
+    day = day or date.today()
+    return day.strftime("%B ") + str(day.day) + day.strftime(", %Y")
 
 
 def to_yf_ticker(sym: str) -> str:
@@ -89,45 +121,135 @@ def fetch_history(tickers: list[str]) -> dict[str, pd.Series]:
     return out
 
 
-def compute_returns(close: pd.Series, today: date) -> dict[str, float | None]:
-    """Compute price/chg/m3/m6/ytd/ret1y from a dividend-adjusted close series."""
-    if close.empty:
-        return {}
-    # Drop tz info so .date() comparisons work
+def _normalize_index(close: pd.Series) -> pd.Series:
     if getattr(close.index, "tz", None) is not None:
         close = close.copy()
         close.index = close.index.tz_localize(None)
+    return close
+
+
+def trailing_return(close: pd.Series, today: date, **offset_kwargs) -> float | None:
+    """Last close at-or-before today minus the given DateOffset, vs latest close."""
+    if close.empty:
+        return None
+    latest = float(close.iloc[-1])
+    target = pd.Timestamp(today) - pd.DateOffset(**offset_kwargs)
+    past = close[close.index <= target]
+    if past.empty:
+        return None
+    past_close = float(past.iloc[-1])
+    if past_close <= 0:
+        return None
+    return (latest / past_close - 1) * 100
+
+
+def compute_returns(close: pd.Series, today: date) -> dict[str, float | None]:
+    """Compute price/chg/w1/m1/m3/m6/ytd/ret1y from a dividend-adjusted close series.
+
+    w1 and m1 were added so the daily job can keep 1-week and 1-month returns
+    fresh between Seeking Alpha drops. m3/m6/ytd/ret1y/chg/price are unchanged.
+    """
+    if close.empty:
+        return {}
+    close = _normalize_index(close)
 
     latest = float(close.iloc[-1])
-    out: dict[str, float | None] = {"price": round(latest, 4)}
+    out: dict[str, float | None] = {"price": latest}
 
     # chg vs previous trading day
     if len(close) >= 2:
         prev = float(close.iloc[-2])
         if prev > 0:
-            out["chg"] = round((latest / prev - 1) * 100, 4)
+            out["chg"] = (latest / prev - 1) * 100
 
     # YTD: first close on/after Jan 1
     ytd_start = pd.Timestamp(today.year, 1, 1)
     ytd_window = close[close.index >= ytd_start]
     if not ytd_window.empty:
-        out["ytd"] = round((latest / float(ytd_window.iloc[0]) - 1) * 100, 4)
+        first = float(ytd_window.iloc[0])
+        if first > 0:
+            out["ytd"] = (latest / first - 1) * 100
 
-    # Trailing N-month total return: last close at-or-before today-N-months
-    def trailing(months: int) -> float | None:
-        target = pd.Timestamp(today) - pd.DateOffset(months=months)
-        past = close[close.index <= target]
-        if past.empty:
-            return None
-        past_close = float(past.iloc[-1])
-        if past_close <= 0:
-            return None
-        return round((latest / past_close - 1) * 100, 4)
+    out["w1"] = trailing_return(close, today, days=7)
+    out["m1"] = trailing_return(close, today, months=1)
+    out["m3"] = trailing_return(close, today, months=3)
+    out["m6"] = trailing_return(close, today, months=6)
+    out["ret1y"] = trailing_return(close, today, months=12)
 
-    out["m3"] = trailing(3)
-    out["m6"] = trailing(6)
-    out["ret1y"] = trailing(12)
+    return out
 
+
+def simple_moving_average(close: pd.Series, window: int) -> float | None:
+    """SMA of the last `window` closes. None if there is not enough history."""
+    if window <= 0 or len(close) < window:
+        return None
+    return float(close.iloc[-window:].mean())
+
+
+def wilder_rsi(close: pd.Series, period: int = 14) -> float | None:
+    """Wilder (smoothed) RSI. Needs at least period+1 closes.
+
+    Seed = simple average of the first `period` gains/losses; subsequent
+    values use Wilder's smoothing: ((prev * (period-1)) + current) / period.
+    Path-dependent, so the full series is used, not a rolling window of 14.
+    """
+    if period <= 0 or len(close) < period + 1:
+        return None
+    delta = close.diff()
+    gains = delta.clip(lower=0.0)
+    losses = (-delta).clip(lower=0.0)
+    # iloc[1 : period+1] is the first `period` changes (diff[0] is NaN).
+    avg_gain = float(gains.iloc[1 : period + 1].mean())
+    avg_loss = float(losses.iloc[1 : period + 1].mean())
+    for i in range(period + 1, len(close)):
+        avg_gain = (avg_gain * (period - 1) + float(gains.iloc[i])) / period
+        avg_loss = (avg_loss * (period - 1) + float(losses.iloc[i])) / period
+    if avg_loss == 0 and avg_gain == 0:
+        return 50.0
+    if avg_loss == 0:
+        return 100.0
+    if avg_gain == 0:
+        return 0.0
+    rs = avg_gain / avg_loss
+    return 100.0 - (100.0 / (1.0 + rs))
+
+
+def compute_technicals(close: pd.Series, today: date) -> dict[str, float | None]:
+    """52-week high/low, SMAs, vs-SMA percentages, and Wilder RSI(14)."""
+    if close.empty:
+        return {}
+    close = _normalize_index(close)
+    latest = float(close.iloc[-1])
+    out: dict[str, float | None] = {}
+
+    start_52 = pd.Timestamp(today) - pd.DateOffset(years=1)
+    window_52 = close[close.index >= start_52]
+    if not window_52.empty:
+        out["high52"] = float(window_52.max())
+        out["low52"] = float(window_52.min())
+
+    for window, field in ((50, "sma50"), (100, "sma100"), (200, "sma200")):
+        value = simple_moving_average(close, window)
+        if value is not None:
+            out[field] = value
+
+    if out.get("sma50") and out["sma50"] > 0:
+        out["vs50"] = (latest / out["sma50"] - 1) * 100
+    if out.get("sma200") and out["sma200"] > 0:
+        out["vs200"] = (latest / out["sma200"] - 1) * 100
+
+    rsi = wilder_rsi(close, 14)
+    if rsi is not None:
+        out["rsi"] = rsi
+
+    return out
+
+
+def compute_all(close: pd.Series, today: date) -> dict[str, float | None]:
+    """Returns + technicals for one symbol. Missing keys mean 'leave old value'."""
+    out = {}
+    out.update(compute_returns(close, today))
+    out.update(compute_technicals(close, today))
     return out
 
 
@@ -154,7 +276,7 @@ def update_record(line: str, results: dict[str, dict]) -> str:
     r = results[sym]
 
     # Update existing fields only when we computed a value (skip when None)
-    for field in ("price", "chg", "m6", "ytd", "ret1y"):
+    for field in UPDATE_FIELDS:
         if r.get(field) is None:
             continue
         line = re.sub(
@@ -200,13 +322,13 @@ def main() -> int:
             failed.append(orig)
             continue
         try:
-            results[orig] = compute_returns(close, today)
+            results[orig] = compute_all(close, today)
         except Exception as e:
             print(f"  compute failed for {orig}: {e}", file=sys.stderr)
             failed.append(orig)
 
     fail_ratio = len(failed) / len(symbols) if symbols else 0
-    print(f"Computed returns for {len(results)} symbols. Failed: {len(failed)} ({fail_ratio:.1%})")
+    print(f"Computed enrichment for {len(results)} symbols. Failed: {len(failed)} ({fail_ratio:.1%})")
     if failed:
         print(f"Failed symbols: {', '.join(failed[:50])}{'...' if len(failed) > 50 else ''}")
 
@@ -223,7 +345,7 @@ def main() -> int:
     DATA_JS.write_text("\n".join(new_lines))
 
     # Update both date strings in index.html
-    today_str = today.strftime("%B %-d, %Y")
+    today_str = format_display_date(today)
     html = INDEX_HTML.read_text()
     html = re.sub(r"(Data: )[A-Za-z]+ \d+, \d{4}", rf"\g<1>{today_str}", html)
     html = re.sub(r"(Last updated: )[A-Za-z]+ \d+, \d{4}", rf"\g<1>{today_str}", html)
