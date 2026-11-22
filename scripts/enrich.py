@@ -17,7 +17,7 @@ Seeking Alpha-only fields are left untouched:
 yTTM / yFWD could later be recomputed from Yahoo dividend history on days
 with no fresh Excel; that is intentionally not done in this change.
 
-Also updates "Data:" / "Last updated:" date strings in index.html.
+Also refreshes DATA_UPDATED_AT in data.js so index.html renders today's date.
 """
 from __future__ import annotations
 
@@ -340,18 +340,19 @@ def main() -> int:
         print("Dry run — not writing files")
         return 0
 
-    # Rewrite data.js line by line so all non-target fields stay byte-for-byte intact
+    # Rewrite data.js line by line so all non-target fields stay byte-for-byte intact.
+    # Also refresh DATA_UPDATED_AT on the first line so the page renders today's date
+    # without any regex patching of index.html.
     new_lines = [update_record(line, results) for line in content.split("\n")]
+    today_iso = today.isoformat()
+    new_lines[0] = re.sub(
+        r'const DATA_UPDATED_AT="[^"]*";',
+        f'const DATA_UPDATED_AT="{today_iso}";',
+        new_lines[0],
+    )
     DATA_JS.write_text("\n".join(new_lines))
 
-    # Update both date strings in index.html
-    today_str = format_display_date(today)
-    html = INDEX_HTML.read_text()
-    html = re.sub(r"(Data: )[A-Za-z]+ \d+, \d{4}", rf"\g<1>{today_str}", html)
-    html = re.sub(r"(Last updated: )[A-Za-z]+ \d+, \d{4}", rf"\g<1>{today_str}", html)
-    INDEX_HTML.write_text(html)
-
-    print(f"Updated data.js ({len(results)} symbols) and index.html ({today_str})")
+    print(f"Updated data.js ({len(results)} symbols, DATA_UPDATED_AT={today_iso})")
     return 0
 
 

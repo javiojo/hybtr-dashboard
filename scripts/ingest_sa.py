@@ -291,8 +291,14 @@ def emit_record(rec: dict) -> str:
 
 
 def write_data_js(records: list[dict], path: Path) -> str:
-    """Write data.js in the historical compact format (no trailing newline)."""
-    lines = ["const D=["]
+    """Write data.js in the historical compact format (no trailing newline).
+
+    Prepends a DATA_UPDATED_AT ISO date constant so index.html can render
+    both the nav 'Data:' chip and the footer 'Last updated:' line without any
+    regex patching of the HTML file.
+    """
+    today_iso = date.today().isoformat()
+    lines = [f'const DATA_UPDATED_AT="{today_iso}";', "const D=["]
     last = len(records) - 1
     for i, rec in enumerate(records):
         suffix = "," if i < last else ""
@@ -391,9 +397,7 @@ def run(args: argparse.Namespace) -> int:
         return 0
     args.output.parent.mkdir(parents=True, exist_ok=True)
     write_data_js(records, args.output)
-    today_str = update_index_dates(args.index)
-    extra = f" and {args.index} ({today_str})" if today_str else ""
-    print(f"Wrote {len(records)} records to {args.output}{extra}")
+    print(f"Wrote {len(records)} records to {args.output} (DATA_UPDATED_AT set to {date.today().isoformat()})")
     return 0
 
 

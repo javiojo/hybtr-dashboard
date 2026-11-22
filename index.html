@@ -277,7 +277,7 @@
     <button class="ntab" data-tab="contact">Contact Us</button>
     <button class="ntab" data-tab="about">Strategy &amp; Features</button>
   </div>
-  <div class="nav-meta" id="navMeta">Data: November 20, 2026</div>
+  <div class="nav-meta" id="navMeta">Data: —</div>
 </nav>
 
 <!-- MODAL -->
@@ -597,7 +597,7 @@
     &nbsp;|&nbsp; <strong>Yield trap:</strong> 1Y Total Return &lt; 0% — any high-yield ETF with a negative total return.
     &nbsp;|&nbsp; <strong>Eligibility:</strong> ETFs must have at least 6 months of price history and a Yield TTM of 3% or higher.
     <div class="footer-bottom">
-      <span class="footer-date">Last updated: November 21, 2026</span>
+      <span class="footer-date" id="footerDate">Last updated: —</span>
       <span style="font-size:12px;color:var(--txt2)"><a href="/privacy.html" style="color:var(--txt2);text-decoration:underline">Privacy Policy</a></span>
       <span class="footer-credit">Developed by Axiom Creative Studios</span>
     </div>
@@ -605,6 +605,21 @@
 </div>
 
 <script src="data.js"></script>
+<script>
+/* Render data-freshness dates from the timestamp written into data.js by the
+   update pipeline. DATA_UPDATED_AT is an ISO date string ("2026-11-22").
+   Falls back gracefully if the variable is absent (older data.js). */
+(function(){
+  if(typeof DATA_UPDATED_AT==='string'&&DATA_UPDATED_AT){
+    var d=new Date(DATA_UPDATED_AT+'T00:00:00');
+    var label=d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    var n=document.getElementById('navMeta');
+    var f=document.getElementById('footerDate');
+    if(n) n.textContent='Data: '+label;
+    if(f) f.textContent='Last updated: '+label;
+  }
+})();
+</script>
 <script>
 /* Email signup posts here after the MailerLite proxy is deployed.
    Leave empty to fail gracefully. See docs/MAILERLITE_SETUP.md. */
