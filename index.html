@@ -603,7 +603,7 @@ D.sort((a,b)=>{
 });
 
 const isYT=e=>e.ret1y!==null&&e.ret1y<0;
-const isLev=e=>e.fund_type==='Leveraged';
+const isLev=e=>e.fund_type==='Leveraged'||(/\b(1\.25|1\.5|1\.75|2|3)x/i.test(e.name)&&!/leveraged loan/i.test(e.name));
 const fmt=(v,d=1)=>v===null?'—':(v>=0?'+':'')+v.toFixed(d)+'%';
 const cc=v=>v===null?'na':v>0?'pos':v<0?'neg':'nt';
 const fmtM=v=>v===null?'—':v>=1000?(v/1000).toFixed(1)+'B':v.toFixed(0)+'M';
@@ -876,7 +876,7 @@ function render(){
       +'<td style="padding:7px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
       +'<button class="sym-btn" data-sym="'+e.symbol+'">'+e.symbol+'</button>'
-      +(e.fund_type==='Leveraged'?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
+      +(isLev(e)?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
@@ -965,7 +965,7 @@ function renderWatchlist(){
       +'<td style="padding:8px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
       +'<button class="sym-btn" onclick="openModal(D.find(x=>x.symbol===\''+e.symbol+'\'))">'+e.symbol+'</button>'
-      +(e.fund_type==='Leveraged'?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
+      +(isLev(e)?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="fnm name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
