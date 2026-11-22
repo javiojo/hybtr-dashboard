@@ -27,3 +27,6 @@ jobs:
 
       - name: Run tests
         run: pytest -q
+
+      - name: Run leverage-flag tests
+        run: node tests/test_leverage_flags.js

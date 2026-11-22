@@ -69,6 +69,7 @@
   .sv{font-size:15px;font-weight:600;font-family:var(--mono)}
   .yp{font-size:10px;background:var(--trap-bg);color:var(--trap-txt);border-radius:4px;padding:1px 5px;font-weight:600;margin-left:4px;white-space:nowrap;flex-shrink:0}
   .lev{font-size:10px;background:rgba(250,204,21,0.12);color:#facc15;border-radius:4px;padding:1px 5px;font-weight:600;margin-left:4px;white-space:nowrap;flex-shrink:0}
+  .lev-modest{font-size:10px;background:rgba(148,163,184,0.14);color:#94a3b8;border-radius:4px;padding:1px 5px;font-weight:600;margin-left:4px;white-space:nowrap;flex-shrink:0}
   .pos{color:var(--pos)}.neg{color:var(--neg)}.nt{color:var(--txt2)}
   .filters{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:.875rem 1.25rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:10px}
   .filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -358,6 +359,7 @@
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--txt2);margin-bottom:8px;padding:0 2px">
       <span style="font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3)">Legend:</span>
       <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:rgba(250,204,21,0.12);color:#facc15;border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Leveraged ETF — use caution, designed for short-term trading</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:rgba(148,163,184,0.14);color:#94a3b8;border-radius:4px;padding:1px 5px;font-weight:600">Uses modest leverage</span> Alternative fund that borrows to boost income — not a 2x/3x daily product</span>
       <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:var(--trap-bg);color:var(--trap-txt);border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Yield Trap — positive yield but negative 1Y total return</span>
     </div>
     <div class="tw"><table>
@@ -635,7 +637,19 @@ D.sort((a,b)=>{
 });
 
 const isYT=e=>e.ret1y!==null&&e.ret1y<0;
-const isLev=e=>e.fund_type==='Leveraged'||(/\b(1\.25|1\.5|1\.75|2|3)x/i.test(e.name)&&!/leveraged loan/i.test(e.name));
+const hasMult=n=>/\b(1\.25|1\.5|1\.75|2|3)x/i.test(n)&&!/leveraged loan/i.test(n);
+const D1806B3=new Set(['NVDS','TYO','HDLB','MLPR','SMHB','CEFD','SPXS','PFFL','TSLQ','TTXD','MVRL','TZA','LABD']);
+const isDailyLevName=n=>hasMult(n)
+  ||/\bproshares ultra(?!short|pro)\b/i.test(n)
+  ||/leveraged long/i.test(n)
+  ||/\blift etf\b/i.test(n)
+  ||(/\bdaily\b/i.test(n)&&/\b(inverse|short|ultra|bear|bull|target|long)\b/i.test(n)&&!/\b1x\b/i.test(n));
+const isAltAc=e=>typeof e.ac==='string'&&e.ac.startsWith('Alternative');
+const isLev=e=>isDailyLevName(e.name)||D1806B3.has(e.symbol)||(e.fund_type==='Leveraged'&&!isAltAc(e));
+const isModestLev=e=>e.fund_type==='Leveraged'&&isAltAc(e)&&!isDailyLevName(e.name);
+const LEV_TIP='Leveraged ETF — Use caution: designed for short-term trading';
+const MODEST_TIP='Alternative fund that borrows or uses derivatives to boost income; not a 2x/3x daily product';
+const levBadge=e=>isLev(e)?'<span class="lev" title="'+LEV_TIP+'" style="cursor:default">&#9888;</span>':isModestLev(e)?'<span class="lev-modest" title="'+MODEST_TIP+'" style="cursor:default">Uses modest leverage</span>':'';
 const fmt=(v,d=1)=>v===null?'—':(v>=0?'+':'')+v.toFixed(d)+'%';
 const cc=v=>v===null?'na':v>0?'pos':v<0?'neg':'nt';
 const fmtM=v=>v===null?'—':v>=1000?(v/1000).toFixed(1)+'B':v.toFixed(0)+'M';
@@ -699,6 +713,7 @@ function openModal(e){
 
   let html='';
   if(isLev(e)) html+='<div class="modal-trap-badge" style="background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.4);color:#fb923c">&#9888; Leveraged ETF — Use caution: designed for short-term trading, not long-term income investing</div>';
+  if(isModestLev(e)) html+='<div class="modal-trap-badge" style="background:rgba(148,163,184,.12);border-color:rgba(148,163,184,.4);color:#94a3b8">Uses modest leverage — Alternative fund that borrows or uses derivatives to boost income; not a 2x/3x daily product</div>';
   if(isYT(e)) html+='<div class="modal-trap-badge">&#9888; Yield Trap — High yield with negative 1Y return</div>';
 
   html+='<div class="modal-section"><div class="modal-section-title">Performance</div><div class="modal-grid">';
@@ -908,7 +923,7 @@ function render(){
       +'<td style="padding:7px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
       +'<button class="sym-btn" data-sym="'+e.symbol+'">'+e.symbol+'</button>'
-      +(isLev(e)?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
+      +levBadge(e)
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
@@ -997,7 +1012,7 @@ function renderWatchlist(){
       +'<td style="padding:8px 4px;text-align:center"><button class="star-btn'+(watchlist.has(e.symbol)?' starred':'')+'" data-sym="'+e.symbol+'" onclick="toggleStar(event,this.dataset.sym)">&#9733;</button></td>'
       +'<td><div class="sc"><span class="rk">'+(i+1)+'</span>'
       +'<button class="sym-btn" onclick="openModal(D.find(x=>x.symbol===\''+e.symbol+'\'))">'+e.symbol+'</button>'
-      +(isLev(e)?'<span class="lev" title="Leveraged ETF — Use caution: designed for short-term trading" style="cursor:default">&#9888;</span>':'')
+      +levBadge(e)
       +(trap?'<span class="yp">&#9888;</span>':'')+'</div></td>'
       +'<td class="fnm name-cell"><span class="name-tip" data-tip="'+e.name.replace(/"/g,'&quot;')+'">'+e.name+'</span></td>'
       +'<td class="r">$'+e.price.toFixed(2)+'</td>'
