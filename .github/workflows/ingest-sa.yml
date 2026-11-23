@@ -177,6 +177,10 @@ jobs:
         if: env.skip != 'true'
         run: python scripts/enrich.py
 
+      - name: Rebuild crawlable Top 50 snapshot
+        if: env.skip != 'true'
+        run: python scripts/build_top50.py
+
       - name: Record ingest state
         if: env.skip != 'true'
         run: |
@@ -198,7 +202,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Never stage Excel exports or the download directory.
-          git add data.js index.html .ingest_state.json
+          git add data.js index.html top-50.html .ingest_state.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
