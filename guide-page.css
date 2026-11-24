@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1b2e5b;--navy-dark:#111e3d;--navy-deep:#0b1428;
+  --lime:#d3e050;--txt:#e8edf8;--txt2:#8fafd4;--txt3:#8fafd4;
+  --pos:#4ade80;--neg:#f87171;
+  --border:rgba(139,155,192,0.15);--surface:#1b2e5b;--r:6px;--rl:10px;
+  --font:'Inter',-apple-system,sans-serif;
+  --mono:'JetBrains Mono','Courier New',monospace;
+}
+body{font-family:var(--font);background:var(--navy-deep);color:var(--txt);min-height:100vh;font-size:15px;line-height:1.75}
+nav{background:var(--navy-dark);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;height:52px;gap:16px}
+nav a{color:var(--lime);text-decoration:none;font-weight:600;font-size:15px}
+nav span{color:var(--txt2);font-size:13px}
+main{max-width:760px;margin:3rem auto;padding:0 1.5rem 4rem}
+h1{font-size:1.75rem;font-weight:600;color:var(--lime);margin-bottom:.5rem;letter-spacing:-0.02em;line-height:1.3}
+.updated{font-size:13px;color:var(--txt2);margin-bottom:1.5rem}
+h2{font-size:1.1rem;font-weight:600;color:var(--txt);margin:2rem 0 .6rem}
+p{color:var(--txt2);margin-bottom:.875rem}
+ul{color:var(--txt2);padding-left:1.4rem;margin-bottom:.875rem}
+li{margin-bottom:.35rem}
+a{color:var(--lime)}
+code{font-family:var(--mono);font-size:.92em;color:var(--txt)}
+.related{list-style:none;padding-left:0}
+.related li{margin-bottom:.5rem}
+.table-wrap{overflow-x:auto;margin:1.25rem 0 2rem;border:1px solid var(--border);border-radius:var(--rl)}
+table{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--mono)}
+th{background:var(--navy-dark);font-size:10px;font-weight:600;color:var(--txt3);text-align:left;padding:8px 10px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:8px 10px;border-top:1px solid var(--border);color:var(--txt);white-space:nowrap}
+td:nth-child(3){white-space:normal;font-family:var(--font);color:var(--txt2)}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.na,.nt{color:var(--txt2)}
+footer{text-align:center;font-size:12px;color:var(--txt2);padding:1.5rem;border-top:1px solid var(--border);line-height:1.8}
+@media(max-width:640px){
+  h1{font-size:1.4rem}
+  main{margin:2rem auto;padding:0 1rem 3rem}
+}

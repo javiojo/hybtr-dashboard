@@ -34,6 +34,12 @@ python scripts/enrich.py
 # ENRICH_DRY_RUN=1 ENRICH_LIMIT=20 python scripts/enrich.py
 
 pytest -q
+
+# Rebuild the crawlable Top 50 table in index.html and top-50.html
+python scripts/build_top50.py
+
+# Regenerate og-image.png and the compressed nav logo (optional)
+python scripts/make_seo_assets.py
 ```
 
 The October 27, 2026 sample export is used as a regression check when it is available (set `HYBTR_SA_SAMPLE`); it is not in this repository.

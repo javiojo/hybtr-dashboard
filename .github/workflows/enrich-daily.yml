@@ -33,12 +33,15 @@ jobs:
       - name: Run enrichment
         run: python scripts/enrich.py
 
+      - name: Rebuild crawlable Top 50 snapshot
+        run: python scripts/build_top50.py
+
       - name: Commit and push
         run: |
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.js index.html
+          git add data.js index.html top-50.html
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
