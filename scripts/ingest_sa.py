@@ -2,7 +2,7 @@
 """
 Convert an official Seeking Alpha ETF screener Excel export into data.js.
 
-Keeps rows with Yield TTM >= 6%, converts decimals to percent and Excel
+Keeps rows with Yield TTM >= 3%, converts decimals to percent and Excel
 serials to YYYY-MM-DD, and writes records in the same field order and
 number format as the existing dashboard file. Also updates the "Data:"
 and "Last updated:" strings in index.html (same pattern as enrich.py).
@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = ROOT / "data.js"
 DEFAULT_INDEX = ROOT / "index.html"
 
-YIELD_MIN_DECIMAL = 0.06  # Seeking Alpha stores 6% as 0.06
+YIELD_MIN_DECIMAL = 0.03  # Seeking Alpha stores 3% as 0.03 (lowered from 6% so SCHD is included)
 
 # data.js field order (must stay stable — the page reads these names).
 FIELD_ORDER = (
@@ -345,7 +345,7 @@ def summarize(records: list[dict], previous_symbols: list[str] | None = None) ->
     traps = [r for r in records if r["ret1y"] is not None and r["ret1y"] < 0]
     ranked = [r for r in records if r["ret1y"] is not None]
     lines = [
-        f"Rows kept (Yield TTM >= 6%): {len(records)}",
+        f"Rows kept (Yield TTM >= 3%): {len(records)}",
         f"Added vs current data.js:    {len(added)}"
         + (f" ({', '.join(added[:20])}{'…' if len(added) > 20 else ''})" if added else ""),
         f"Removed vs current data.js:  {len(removed)}"

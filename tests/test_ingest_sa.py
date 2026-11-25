@@ -232,7 +232,7 @@ def write_synthetic_xlsx(path: Path) -> None:
             0.25,
         ]
     )
-    # Drop: yield 5.99%
+    # Drop: yield 2.99%
     ws.append(
         [
             3,
@@ -255,8 +255,8 @@ def write_synthetic_xlsx(path: Path) -> None:
             1,
             None,
             None,
-            0.0599,
-            0.05,
+            0.0299,
+            0.02,
             "Annual",
             30,
             0,
@@ -347,7 +347,7 @@ def test_dry_run_writes_nothing(tmp_path: Path, capsys):
     )
     assert rc == 0
     captured = capsys.readouterr().out
-    assert "Rows kept (Yield TTM >= 6%): 2" in captured
+    assert "Rows kept (Yield TTM >= 3%): 2" in captured
     assert "KEEP1" in captured and "KEEP2:CA" in captured
     assert "OLD" in captured  # removed
     assert "Dry run — not writing files" in captured
