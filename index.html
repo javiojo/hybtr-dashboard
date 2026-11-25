@@ -53,13 +53,13 @@
   .nav-meta{font-size:12px;color:var(--txt2);font-family:var(--mono)}
   .wrap{max-width:1280px;margin:0 auto;padding:1.25rem 1.25rem 3rem}
 
-  .page-hero{margin:0 0 1.25rem;padding:0 2px}
-  .page-hero h1{font-size:1.35rem;font-weight:600;color:var(--txt);letter-spacing:-0.02em;line-height:1.3}
+  .page-hero{margin:1.75rem 0 0;padding:1rem 2px 0;border-top:1px solid var(--border)}
+  .page-hero h1{font-size:0.95rem;font-weight:600;color:var(--txt);letter-spacing:-0.01em;line-height:1.4}
   .page-hero .page-sub{font-size:13px;color:var(--txt2);margin-top:6px;max-width:46rem;line-height:1.6}
-  .page-links{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:10px;font-size:12px}
+  .page-links{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px;font-size:12px}
   .page-links a{color:var(--lime);text-decoration:none}
   .page-links a:hover{text-decoration:underline}
-  @media(max-width:640px){.page-hero h1{font-size:1.15rem}}
+  @media(max-width:640px){.page-hero h1{font-size:0.9rem}}
   .tab-panel{display:none}.tab-panel.active{display:block}
   .heroes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25rem}
   @media(max-width:640px){.heroes{grid-template-columns:1fr}}
@@ -357,16 +357,6 @@
 </div>
 
 <div class="wrap">
-  <header class="page-hero">
-    <h1>HYBTR: High-Yield ETFs Ranked by Total Return</h1>
-    <p class="page-sub">A research screener for US- and Canada-listed dividend ETFs, ranked by 1-year total return — not yield alone. HYBTR is not the HYTR ETF.</p>
-    <p class="page-links">
-      <a href="/top-50.html">Top 50 snapshot</a>
-      <a href="/yield-trap-etfs.html">Yield trap ETFs</a>
-      <a href="/high-yield-etfs-total-return.html">Ranked by total return</a>
-      <a href="/weekly-canadian-high-yield-etfs.html">Weekly-pay &amp; Canadian ETFs</a>
-    </p>
-  </header>
   <div class="tab-panel active" id="tab-dashboard">
     <div class="heroes">
       <div class="hero hero-top" id="heroTop"></div>
@@ -713,6 +703,17 @@
       </div>
     </div>
   </div>
+
+  <header class="page-hero">
+    <h1>HYBTR: High-Yield ETFs Ranked by Total Return</h1>
+    <p class="page-sub">A research screener for US- and Canada-listed dividend ETFs, ranked by 1-year total return — not yield alone. HYBTR is not the HYTR ETF.</p>
+    <p class="page-links">
+      <a href="/top-50.html">Top 50 snapshot</a>
+      <a href="/yield-trap-etfs.html">Yield trap ETFs</a>
+      <a href="/high-yield-etfs-total-return.html">Ranked by total return</a>
+      <a href="/weekly-canadian-high-yield-etfs.html">Weekly-pay &amp; Canadian ETFs</a>
+    </p>
+  </header>
 
   <footer>
     <strong>Disclaimer:</strong> This tracker is not financial advice. Information provided is for fun, entertainment, and research purposes only. Please consult a licensed financial planner for all your financial planning needs.
