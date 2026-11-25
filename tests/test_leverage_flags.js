@@ -57,7 +57,7 @@ function check(cond, msg) {
 // MMDC:CA is the motivating case
 const mmdc = must('MMDC:CA');
 check(isModestLev(mmdc) && !isLev(mmdc), 'MMDC:CA should be modest, not isLev');
-check(/Uses modest leverage/.test(levBadge(mmdc)), 'MMDC:CA badge should say Uses modest leverage');
+check(/&#9888;/.test(levBadge(mmdc)), 'MMDC:CA badge should show the leverage symbol');
 check(!/Leveraged ETF/.test(levBadge(mmdc)), 'MMDC:CA must not show the short-term leveraged warning');
 
 // True daily products that lack a 2x/3x token in the name must keep the warning

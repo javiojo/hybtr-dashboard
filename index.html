@@ -416,7 +416,7 @@
     <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:11px;color:var(--txt2);margin-bottom:8px;padding:0 2px">
       <span style="font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3)">Legend:</span>
       <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:rgba(250,204,21,0.12);color:#facc15;border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Leveraged ETF — use caution, designed for short-term trading</span>
-      <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:rgba(148,163,184,0.14);color:#94a3b8;border-radius:4px;padding:1px 5px;font-weight:600">Uses modest leverage</span> Alternative fund that borrows to boost income — not a 2x/3x daily product</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:rgba(250,204,21,0.12);color:#facc15;border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Uses modest leverage: alternative fund that borrows to boost income — not a 2x/3x daily product</span>
       <span style="display:flex;align-items:center;gap:5px"><span style="font-size:10px;background:var(--trap-bg);color:var(--trap-txt);border-radius:4px;padding:1px 5px;font-weight:600">&#9888;</span> Yield Trap — positive yield but negative 1Y total return</span>
     </div>
     <div class="tw"><table>
@@ -770,7 +770,7 @@ const isLev=e=>isDailyLevName(e.name)||D1806B3.has(e.symbol)||(e.fund_type==='Le
 const isModestLev=e=>e.fund_type==='Leveraged'&&isAltAc(e)&&!isDailyLevName(e.name);
 const LEV_TIP='Leveraged ETF — Use caution: designed for short-term trading';
 const MODEST_TIP='Alternative fund that borrows or uses derivatives to boost income; not a 2x/3x daily product';
-const levBadge=e=>isLev(e)?'<span class="lev" title="'+LEV_TIP+'" style="cursor:default">&#9888;</span>':isModestLev(e)?'<span class="lev-modest" title="'+MODEST_TIP+'" style="cursor:default">Uses modest leverage</span>':'';
+const levBadge=e=>isLev(e)?'<span class="lev" title="'+LEV_TIP+'" style="cursor:default">&#9888;</span>':isModestLev(e)?'<span class="lev" title="'+MODEST_TIP+'" style="cursor:default">&#9888;</span>':'';
 const fmt=(v,d=1)=>v===null?'—':(v>=0?'+':'')+v.toFixed(d)+'%';
 const cc=v=>v===null?'na':v>0?'pos':v<0?'neg':'nt';
 const fmtM=v=>v===null?'—':v>=1000?(v/1000).toFixed(1)+'B':v.toFixed(0)+'M';
