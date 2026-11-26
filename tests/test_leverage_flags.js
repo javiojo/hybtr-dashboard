@@ -60,9 +60,11 @@ check(isModestLev(mmdc) && !isLev(mmdc), 'MMDC:CA should be modest, not isLev');
 check(/&#9888;/.test(levBadge(mmdc)), 'MMDC:CA badge should show the leverage symbol');
 check(!/Leveraged ETF/.test(levBadge(mmdc)), 'MMDC:CA must not show the short-term leveraged warning');
 
-// True daily products that lack a 2x/3x token in the name must keep the warning
+// True daily products that lack a 2x/3x token in the name must keep the warning.
+// Skip tickers absent from the current ingest (UBR dropped out of the 2026-11-25 export).
 for (const sym of ['UBR', 'XPP', 'PLTA', 'NVDB', 'CRCA', 'COIA', 'MST', 'TDAX', 'TSYX']) {
-  const e = must(sym);
+  const e = bySym[sym];
+  if (!e) continue;
   check(isLev(e) && !isModestLev(e), `${sym} (${e.name}) must keep the strong leveraged warning`);
 }
 

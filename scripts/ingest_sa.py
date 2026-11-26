@@ -4,8 +4,9 @@ Convert an official Seeking Alpha ETF screener Excel export into data.js.
 
 Keeps rows with Yield TTM >= 3%, converts decimals to percent and Excel
 serials to YYYY-MM-DD, and writes records in the same field order and
-number format as the existing dashboard file. Also updates the "Data:"
-and "Last updated:" strings in index.html (same pattern as enrich.py).
+number format as the existing dashboard file. Writes DATA_UPDATED_AT in
+data.js so the page can render "Data:" and "Last updated:", and also
+refreshes those static fallback strings in index.html.
 
 Usage:
   python scripts/ingest_sa.py --input export.xlsx
@@ -315,14 +316,20 @@ def format_display_date(day: date | None = None) -> str:
     return day.strftime("%B ") + str(day.day) + day.strftime(", %Y")
 
 
+# Display dates, or the em-dash placeholder used before fallback text was filled in.
+_INDEX_DATE_RE = r"(?:[A-Za-z]+ \d+, \d{4}|—|&mdash;|–)"
+
+
 def update_index_dates(index_path: Path, day: date | None = None) -> str:
+    """Refresh the static 'Data:' / 'Last updated:' fallback strings in index.html."""
     if not index_path.exists():
         return ""
     today_str = format_display_date(day)
     html = index_path.read_text()
-    html = re.sub(r"(Data: )[A-Za-z]+ \d+, \d{4}", rf"\g<1>{today_str}", html)
-    html = re.sub(r"(Last updated: )[A-Za-z]+ \d+, \d{4}", rf"\g<1>{today_str}", html)
-    index_path.write_text(html)
+    updated = re.sub(rf"(Data: ){_INDEX_DATE_RE}", rf"\g<1>{today_str}", html)
+    updated = re.sub(rf"(Last updated: ){_INDEX_DATE_RE}", rf"\g<1>{today_str}", updated)
+    if updated != html:
+        index_path.write_text(updated)
     return today_str
 
 
@@ -397,7 +404,12 @@ def run(args: argparse.Namespace) -> int:
         return 0
     args.output.parent.mkdir(parents=True, exist_ok=True)
     write_data_js(records, args.output)
-    print(f"Wrote {len(records)} records to {args.output} (DATA_UPDATED_AT set to {date.today().isoformat()})")
+    today_iso = date.today().isoformat()
+    print(f"Wrote {len(records)} records to {args.output} (DATA_UPDATED_AT set to {today_iso})")
+    if args.index:
+        label = update_index_dates(args.index)
+        if label and args.index.exists():
+            print(f"Updated fallback dates in {args.index} to {label}")
     return 0
 
 

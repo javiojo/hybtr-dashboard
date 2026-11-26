@@ -328,7 +328,8 @@ def test_yield_filter_and_mapping_on_synthetic(tmp_path: Path):
     assert 'ac:""' in text
     assert "inception:null" in text
     assert "ret1y:null" in text
-    assert text.startswith("const D=[")
+    today_iso = date.today().isoformat()
+    assert text.startswith(f'const DATA_UPDATED_AT="{today_iso}";\nconst D=[')
     assert text.endswith("];")
     assert not text.endswith("];\n")
 
@@ -365,12 +366,36 @@ def test_writes_data_and_updates_index_dates(tmp_path: Path):
         ["--input", str(xlsx), "--output", str(out), "--index", str(index)]
     )
     assert rc == 0
-    records = parse_data_js(out.read_text())
+    js = out.read_text()
+    today_iso = date.today().isoformat()
+    assert js.startswith(f'const DATA_UPDATED_AT="{today_iso}";\nconst D=[')
+    records = parse_data_js(js)
     assert [r["symbol"] for r in records] == ["KEEP1", "KEEP2:CA"]
     today = ingest_sa.format_display_date()
     html = index.read_text()
     assert f"Data: {today}" in html
     assert f"Last updated: {today}" in html
+
+
+def test_update_index_dates_replaces_placeholder(tmp_path: Path):
+    index = tmp_path / "index.html"
+    index.write_text('<div id="navMeta">Data: —</div>\n<span id="footerDate">Last updated: —</span>\n')
+    day = date(2026, 11, 25)
+    label = ingest_sa.update_index_dates(index, day)
+    assert label == "November 25, 2026"
+    html = index.read_text()
+    assert "Data: November 25, 2026" in html
+    assert "Last updated: November 25, 2026" in html
+
+
+def test_index_reads_data_updated_at_with_static_fallback():
+    html = (ROOT / "index.html").read_text()
+    assert 'src="data.js"' in html
+    assert re.search(r'id="navMeta">Data: [A-Za-z]+ \d+, \d{4}<', html)
+    assert re.search(r'id="footerDate">Last updated: [A-Za-z]+ \d+, \d{4}<', html)
+    assert "typeof DATA_UPDATED_AT==='string'" in html
+    assert "n.textContent='Data: '+label" in html
+    assert "f.textContent='Last updated: '+label" in html
 
 
 @pytest.fixture
