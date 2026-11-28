@@ -92,16 +92,19 @@ def make_og_image() -> Path:
     pb = draw.textbbox((0, 0), pill, font=font_pill)
     pw, ph = pb[2] - pb[0], pb[3] - pb[1]
     pad_x, pad_y = 16, 8
-    px = (W - pw) // 2
+    px = (W - pw) // 2 - pb[0]
     py = logo_y + logo_h + 88
+    # pb[0]/pb[1] are the glyph offsets from the draw origin; account for them
+    # so the text sits centred inside the pill instead of on its bottom edge.
+    tx, ty = px, py - pb[1]
     draw.rounded_rectangle(
-        (px - pad_x, py - pad_y, px + pw + pad_x, py + ph + pad_y),
+        (tx + pb[0] - pad_x, py - pad_y, tx + pb[0] + pw + pad_x, py + ph + pad_y),
         radius=8,
         outline=LIME,
         width=2,
         fill=(211, 224, 80, 20),
     )
-    draw.text((px, py), pill, font=font_pill, fill=LIME)
+    draw.text((tx, ty), pill, font=font_pill, fill=LIME)
 
     font_url = _font(22, 500)
     url = "hybtretfs.com"
@@ -118,5 +121,4 @@ def make_og_image() -> Path:
 
 
 if __name__ == "__main__":
-    optimize_logo()
     make_og_image()
